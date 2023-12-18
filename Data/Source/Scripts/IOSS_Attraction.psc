@@ -257,12 +257,12 @@ Function InitialAttractivenessQuestionnaire()
     IOSS_AttractivenessBase.setValue(attFinal)
 
     if attFinal < 17
-        debug.Notification("Your character's attractiveness is below average.")
+        debug.Notification("Your base attractiveness is below average.")
     elseIf attFinal >= 17
         if attFinal < 34
-            debug.Notification("Your character's attractiveness is around average.")
+            debug.Notification("Your base attractiveness is around average.")
         elseIf attFinal >= 34
-            debug.Notification("Your character's attractiveness is above average.")
+            debug.Notification("Your base attractiveness is above average.")
         endIf
     endIf
 endFunction
