@@ -16,7 +16,7 @@ function Chatter(actor actor1)
     float Bonus_Attraction = ((IOSS_CurrentAttraction.GetValue() + 1) * playerref.GetAV("Speechcraft"))
     float Bonus_Intimacy = (actor1.GetFactionRank(OCR_Lover_Value_Intimacy) / 2)
     float Bonus_DispositionRank = (actor1.GetRelationshipRank(playerref) * 12.5)
-    float SuccessRate = (((Bonus_Attraction + Bonus_Intimacy + Bonus_DispositionRank) / 1) * 100)
+    float SuccessRate = ((Bonus_Attraction + Bonus_Intimacy + Bonus_DispositionRank) / 100)
     MiscUtil.PrintConsole("IOSS_SceneInteractions: Success rate is" + SuccessRate)
     
     ;Now, "roll the dice"
