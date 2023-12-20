@@ -50,8 +50,10 @@ function SceneChatter(actor actor1)
     if RandomChance < SuccessChance
     ;If it was successful
         int currentIntimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-        int newIntimacy = currentIntimacy + ((actor1.GetRelationshipRank(playerref) + 1) * 2)
-        actor1.SetFactionRank(OCR_Lover_Value_Intimacy, newIntimacy)
+        if currentIntimacy < 100
+            int newIntimacy = currentIntimacy + ((actor1.GetRelationshipRank(playerref) + 1) * 2)
+            actor1.SetFactionRank(OCR_Lover_Value_Intimacy, newIntimacy)
+        endif
         Util.Chatter(actor1)
         AnimationPlayed = 1  ; Indicates the "Chatter" result
     else
@@ -84,15 +86,17 @@ function SceneCourt(actor actor1)
             ;If it was successful
             ;Courting has diminishing returns on Love increase
             int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
-            if currentLove < 15
-                int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 3)
-                actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 30
-                int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 2)
-                actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 60
-                int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 1)
-                actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+            if currentLove < 100
+                if currentLove < 15
+                    int newLove = currentLove + 3
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                elseIf currentLove < 30
+                    int newLove = currentLove + 2
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                elseIf currentLove < 60
+                    int newLove = currentLove + 1
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                endif
             endif
             Util.Court(actor1)
             AnimationPlayed = 3  ; Indicates the "Court" result
@@ -146,18 +150,20 @@ function SceneCaress(actor actor1)
                 ;If it was successful
                 ;Caressing has diminishing returns on Love increase
                 int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
-                if currentLove < 10
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 4)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-                elseIf currentLove < 20
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 3)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-                elseIf currentLove < 40
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 2)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-                elseIf currentLove < 80
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 1)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                if currentLove < 100
+                    if currentLove < 10
+                        int newLove = currentLove + 4
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    elseIf currentLove < 20
+                        int newLove = currentLove + 3
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    elseIf currentLove < 40
+                        int newLove = currentLove + 2
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    elseIf currentLove < 80
+                        int newLove = currentLove + 1
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    endif
                 endif
                 ;Play a random caressing animation
                 int randomCaress = Utility.RandomInt(1, 3)
@@ -223,18 +229,20 @@ function SceneKiss(actor actor1)
                 ;If it was successful
                 ;Kissing has diminishing returns on Love increase
                 int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
-                if currentLove < 25
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 5)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-                elseIf currentLove < 50
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 4)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-                elseIf currentLove < 75
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 3)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-                elseIf currentLove < 100
-                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 2)
-                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                if currentLove < 100
+                    if currentLove < 25
+                        int newLove = currentLove + 5
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    elseIf currentLove < 50
+                        int newLove = currentLove + 4
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    elseIf currentLove < 75
+                        int newLove = currentLove + 3
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    elseIf currentLove < 100
+                        int newLove = currentLove + 2
+                        actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                    endif
                 endif
                 Util.Kiss1(actor1) ; To do: adding lots of kissing animations for variety
                 AnimationPlayed = 7  ; Indicates a "Kiss" result
