@@ -258,17 +258,17 @@ function RevealAttraction(actor actor1)
         ;Do nothing
     else
         ;Calculate the success rate for attraction reveal
-        float AttractionRevealChance = (playerref.GetAV("Speechcraft") / 2) + (OCR_CurrentAttraction.GetValue() * 10)
+        float AttractionRevealChance = (playerref.GetAV("Speechcraft") / 3) + (OCR_CurrentAttraction.GetValue() * 10)
         float RandomChance = Utility.RandomFloat(0, 100)
         ;Check if the attraction value should be revealed
         if RandomChance < AttractionRevealChance
-            if OCR_CurrentAttraction.GetValue() >= 1
+            if OCR_CurrentAttraction.GetValue() >= 0.9
                 IOSS_SceneMSG_RevealAttracted.Show()
                 SceneNPC.GetActorReference().AddToFaction(IOSS_Revealed_Attracted)
             else
                 ;The RevealNotAttracted message suggests that it wil be hard to build a romantic relationship with the NPC.
-                ;Hard is not impossible, so, after a considerable amount of Love has been built up despite attraction being lower than 1, the message should not be shown.
-                if SceneNPC.GetActorReference().GetFactionRank(OCR_Lover_Value_Love) < 21
+                ;Hard is not impossible, so, after a considerable amount of Love has been built up despite attraction being lower than 0.9, the message should not be shown.
+                if SceneNPC.GetActorReference().GetFactionRank(OCR_Lover_Value_Love) < 10
                     IOSS_SceneMSG_RevealNotAttracted.Show()
                 endif
             endif
