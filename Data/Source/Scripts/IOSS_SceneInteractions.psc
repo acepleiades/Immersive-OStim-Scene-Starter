@@ -123,9 +123,9 @@ function SceneCaress(actor actor1)
     bool WillingToBeCaressed
     if actor1.GetAV("Morality") <= 1
         WillingToBeCaressed = true
-    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy >= 10)
+    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy >= 5)
         WillingToBeCaressed = true
-    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 20)
+    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 10)
         WillingToBeCaressed = true
     else
         MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC is not willing to be caressed due to low Intimacy.")
@@ -134,8 +134,8 @@ function SceneCaress(actor actor1)
         ;Automatic failure if attraction is too low
         if OCR_CurrentAttraction.GetValue() > 0.85
             ;Calculate the success rate for this interaction
-            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 33)
-            float Bonus_Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
+            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 30)
+            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.1)
             float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 5)
             float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
             MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Attraction is " + Bonus_Attraction)
@@ -202,19 +202,19 @@ function SceneKiss(actor actor1)
     bool WillingToKiss
     if actor1.GetAV("Morality") == 0
         WillingToKiss = true
-    elseIf (actor1.GetAV("Morality") == 1 && actor1Intimacy >= 10)
+    elseIf (actor1.GetAV("Morality") == 1 && actor1Intimacy >= 5)
         WillingToKiss = true
-    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy >= 20)
+    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy >= 10)
         WillingToKiss = true
-    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 30)
+    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 20)
         WillingToKiss = true
     endif
     if WillingToKiss == true
         ;Automatic failure if attraction is too low
         if OCR_CurrentAttraction.GetValue() > 0.85
             ;Calculate the success rate for this interaction
-            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 10)
-            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love))
+            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 15)
+            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.3)
             float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 10)
             float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
             MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Attraction is " + Bonus_Attraction)
@@ -463,13 +463,13 @@ endFunction
 ;A function for calculating the interactions cooldown when the player failed to seduce NPC. The cooldown goes down with higher Intimacy.
 function RefusalCooldown_Seduce(actor actor1)
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-    if actor1Intimacy < 25
+    if actor1Intimacy < 20
         InteractionCooldown24h(actor1)
-    elseif actor1Intimacy < 50
+    elseif actor1Intimacy < 40
         InteractionCooldown12h(actor1)
-    elseif actor1Intimacy < 75
+    elseif actor1Intimacy < 80
         InteractionCooldown6h(actor1)
-    elseif actor1Intimacy < 100
+    else
         InteractionCooldown2h(actor1)
     endif
 endfunction
