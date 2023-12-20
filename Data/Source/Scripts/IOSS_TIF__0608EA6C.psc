@@ -7,6 +7,7 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 (GetOwningQuest() as OCR_AttractionUtil).GetAttraction(akspeaker)
+(GetOwningQuest() as IOSS_SceneInteractions).OfCourseCooldown(akspeaker)
 ;END CODE
 EndFunction
 ;END FRAGMENT

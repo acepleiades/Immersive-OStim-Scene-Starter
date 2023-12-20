@@ -25,6 +25,7 @@ SPELL Property IOSS_InteractionCooldownSpell12h  Auto
 SPELL Property IOSS_InteractionCooldownSpell24h  Auto
 SPELL Property IOSS_InteractionCooldownSpell2h  Auto
 SPELL Property IOSS_InteractionCooldownSpell6h  Auto
+SPELL Property IOSS_OfCourseCooldownSpell  Auto
 
 
 ; Script-wide variable to track which animation was played
@@ -173,7 +174,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     if (AnimationPlayed == 1) ;Chatter Success
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 2
+        float newHour = currentHour + 1
         GameHour.SetValue(newHour)
         ;Intimacy gain notifications
         actor actor1 = SceneNPC.GetActorReference()
@@ -187,7 +188,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     elseif (AnimationPlayed == 2) ;Chatter Fail
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 1
+        float newHour = currentHour + 0.5
         GameHour.SetValue(newHour)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1000.0)
@@ -219,8 +220,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1500.0)
         ;Interactions cooldown
-        actor actor1 = SceneNPC.GetActorReference()
-        IOSS_InteractionCooldownSpell6h.Cast(actor1, actor1)
+        IOSS_InteractionCooldownSpell2h.Cast(playerref, SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Court_Fail1.Show()
         ;Tooltip for first failure
@@ -231,14 +231,13 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     elseif (AnimationPlayed == 5) ;Caress Success
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 0.25
+        float newHour = currentHour + 0.5
         GameHour.SetValue(newHour)
         ;Love gain notifications
         LoveGainNotification(SceneNPC.GetActorReference())
     elseif (AnimationPlayed == 6) ;Caress Fail
         ;Interactions cooldown
-        actor actor1 = SceneNPC.GetActorReference()
-        IOSS_InteractionCooldownSpell2h.Cast(actor1, actor1)
+        IOSS_InteractionCooldownSpell2h.Cast(playerref, SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Caress_Fail1.Show()
         ;Tooltip for first failure
@@ -251,6 +250,11 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     SceneNPC.Clear()
     AnimationPlayed = 0
 EndEvent
+
+function OfCourseCooldown(actor actor1)
+    ;It is annoying to keep hearing "of course" across multiple interactions, so this function will apply a temporary keyword for the NPC to use the unvoiced (Nods) response instead.
+    IOSS_OfCourseCooldownSpell.Cast(actor1, actor1)
+endFunction
 
 function RevealAttraction(actor actor1)
     ;If attraction for this NPC has not been revealed before, calculate the chance of attraction value being revealed
