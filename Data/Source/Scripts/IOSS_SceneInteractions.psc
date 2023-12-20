@@ -65,8 +65,8 @@ endFunction
 function SceneCourt(actor actor1)
     ;Add the NPC to the Love faction, this does nothing if he or she is already in it
     actor1.AddToFaction(OCR_Lover_Value_Love)
-    ;Automatic failure if attraction is lower than 0.70
-    if OCR_CurrentAttraction.GetValue() > 0.70
+    ;Automatic failure if attraction is too low
+    if OCR_CurrentAttraction.GetValue() > 0.85
         ;Calculate the success rate for this interaction
         float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 50)
         float Bonus_Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
@@ -85,12 +85,9 @@ function SceneCourt(actor actor1)
             ;Courting has diminishing returns on Love increase
             int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
             if currentLove < 15
-                int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 4)
-                actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 30
                 int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 3)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 45
+            elseIf currentLove < 30
                 int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 2)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
             elseIf currentLove < 60
@@ -114,8 +111,8 @@ endFunction
 function SceneCaress(actor actor1)
     ;Add the NPC to the Love faction, this does nothing if he or she is already in it
     actor1.AddToFaction(OCR_Lover_Value_Love)
-    ;Automatic failure if attraction is lower than 0.80
-    if OCR_CurrentAttraction.GetValue() > 0.80
+    ;Automatic failure if attraction is too low
+    if OCR_CurrentAttraction.GetValue() > 0.85
         ;Calculate the success rate for this interaction
         float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 33)
         float Bonus_Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
@@ -136,13 +133,13 @@ function SceneCaress(actor actor1)
             if currentLove < 10
                 int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 4)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 30
+            elseIf currentLove < 20
                 int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 3)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 50
+            elseIf currentLove < 40
                 int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 2)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
-            elseIf currentLove < 70
+            elseIf currentLove < 80
                 int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 1)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
             endif
@@ -164,6 +161,79 @@ function SceneCaress(actor actor1)
         Util.CaressFail(actor1)
         AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
     endIf
+    SceneNPC.ForceRefTo(actor1)
+    RegisterForModEvent("ostim_end", "OStimEnd")
+endFunction
+
+function SceneKiss(actor actor1)
+    ;Add the NPC to the Love faction, this does nothing if he or she is already in it
+    actor1.AddToFaction(OCR_Lover_Value_Love)
+    ;Based on NPC's morality, kissing may require a minimum Intimacy value
+    float actor1Morality  = actor1.GetAV("Morality")
+    float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
+    bool WillingToKiss
+    if actor1.GetAV("Morality") == 0
+        WillingToKiss = true
+        MiscUtil.PrintConsole("NPC has Morality 0 and is willing to kiss anyone he or she finds attractive.")
+    elseIf (actor1.GetAV("Morality") == 1 && actor1Intimacy == 10)
+        WillingToKiss = true
+        MiscUtil.PrintConsole("NPC has Morality 1 and requires a minimum Intimacy value of 10 for kissing.")
+    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy == 20)
+        WillingToKiss = true
+        MiscUtil.PrintConsole("NPC has Morality 2 and requires a minimum Intimacy value of 20 for kissing.")
+    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy == 30)
+        WillingToKiss = true
+        MiscUtil.PrintConsole("NPC has Morality 3 and requires a minimum Intimacy value of 30 for kissing.")
+    else
+        MiscUtil.PrintConsole("NPC is not willing to kiss due to low Intimacy.")
+    endif
+    if WillingToKiss == true
+        ;Automatic failure if attraction is too low
+        if OCR_CurrentAttraction.GetValue() > 0.85
+            ;Calculate the success rate for this interaction
+            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 10)
+            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.5)
+            float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 10)
+            float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
+            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Attraction is " + Bonus_Attraction)
+            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Love is " + Bonus_Love)
+            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Speechcraft is " + Bonus_Speechcraft)
+            MiscUtil.PrintConsole("IOSS_SceneInteractions: Success rate for this interaction is " + SuccessChance)
+            ;Now, "roll the dice"
+            float RandomChance = Utility.RandomFloat(0, 100)
+            MiscUtil.PrintConsole("IOSS_SceneInteractions: 'Dice roll' is " + RandomChance)
+            MiscUtil.PrintConsole("IOSS_SceneInteractions: See that the 'dice roll' has to be lower than the success rate to succeed.")
+            if RandomChance < SuccessChance
+                ;If it was successful
+                ;Kissing has diminishing returns on Love increase
+                int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
+                if currentLove < 25
+                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 4)
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                elseIf currentLove < 50
+                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 3)
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                elseIf currentLove < 75
+                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 2)
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                elseIf currentLove < 100
+                    int newLove = currentLove + (actor1.GetFactionRank(OCR_Lover_Value_Love) + 1)
+                    actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
+                endif
+                Util.Kiss1(actor1) ; To do: adding lots of kissing animations for variety
+                AnimationPlayed = 7  ; Indicates a "kiss" animation was played
+            else
+                Util.CaressFail(actor1)
+                AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+            endif
+        Else
+            Util.CaressFail(actor1)
+            AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+        endIf
+    Else
+        Util.CaressFail(actor1)
+        AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+    endif
     SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
@@ -193,7 +263,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1000.0)
         ;Interactions cooldown
-        IOSS_InteractionCooldownSpell2h.Cast(playerref, SceneNPC.GetActorReference())
+        InteractionCooldown2h(SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Chatter_Fail1.Show()
         ;Tooltip for first failure
@@ -220,7 +290,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1500.0)
         ;Interactions cooldown
-        IOSS_InteractionCooldownSpell2h.Cast(playerref, SceneNPC.GetActorReference())
+        InteractionCooldown2h(SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Court_Fail1.Show()
         ;Tooltip for first failure
@@ -237,7 +307,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         LoveGainNotification(SceneNPC.GetActorReference())
     elseif (AnimationPlayed == 6) ;Caress Fail
         ;Interactions cooldown
-        IOSS_InteractionCooldownSpell2h.Cast(playerref, SceneNPC.GetActorReference())
+        InteractionCooldown2h(SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Caress_Fail1.Show()
         ;Tooltip for first failure
@@ -245,16 +315,18 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             IOSS_Tooltip_CaressFail.Show()
             IOSS_ShownTooltip_CaressFail.SetValue(1)
         endif
+    elseif (AnimationPlayed == 7) ;Kiss Success
+        ;Skip time based on result
+        float currentHour = GameHour.GetValue()
+        float newHour = currentHour + 0.5
+        GameHour.SetValue(newHour)
+        ;Love gain notifications
+        LoveGainNotification(SceneNPC.GetActorReference())
     endif
     ;Reset
     SceneNPC.Clear()
     AnimationPlayed = 0
 EndEvent
-
-function OfCourseCooldown(actor actor1)
-    ;It is annoying to keep hearing "of course" across multiple interactions, so this function will apply a temporary keyword for the NPC to use the unvoiced (Nods) response instead.
-    IOSS_OfCourseCooldownSpell.Cast(actor1, actor1)
-endFunction
 
 function RevealAttraction(actor actor1)
     ;If attraction for this NPC has not been revealed before, calculate the chance of attraction value being revealed
@@ -266,15 +338,13 @@ function RevealAttraction(actor actor1)
         float RandomChance = Utility.RandomFloat(0, 100)
         ;Check if the attraction value should be revealed
         if RandomChance < AttractionRevealChance
-            if OCR_CurrentAttraction.GetValue() >= 0.9
+            if OCR_CurrentAttraction.GetValue() >= 0.85
+                ;NPC is, at least, somewhat attracted
                 IOSS_SceneMSG_RevealAttracted.Show()
                 SceneNPC.GetActorReference().AddToFaction(IOSS_Revealed_Attracted)
             else
-                ;The RevealNotAttracted message suggests that it wil be hard to build a romantic relationship with the NPC.
-                ;Hard is not impossible, so, after a considerable amount of Love has been built up despite attraction being lower than 0.9, the message should not be shown.
-                if SceneNPC.GetActorReference().GetFactionRank(OCR_Lover_Value_Love) < 10
-                    IOSS_SceneMSG_RevealNotAttracted.Show()
-                endif
+                ;NPC is not attracted
+                IOSS_SceneMSG_RevealNotAttracted.Show()
             endif
         endif
     endif
@@ -334,7 +404,24 @@ function LoveGainNotification(actor actor1)
         else ; This is for currentLove >= 90
             Debug.Notification("Your relationship is true love.")
 endif
-
     Debug.Notification("Love with your partner has increased.")
     endif
+endFunction
+
+;Functions for applying cooldowns
+function OfCourseCooldown(actor actor1)
+    ;It is annoying to keep hearing "of course" across multiple interactions, so this function will apply a temporary keyword for the NPC to use the unvoiced (Nods) response instead.
+    IOSS_OfCourseCooldownSpell.Cast(playerref, actor1)
+endFunction
+function InteractionCooldown2h(actor actor1)
+    IOSS_InteractionCooldownSpell2h.Cast(playerref, actor1)
+endFunction
+function InteractionCooldown6h(actor actor1)
+    IOSS_InteractionCooldownSpell6h.Cast(playerref, actor1)
+endFunction
+function InteractionCooldown12h(actor actor1)
+    IOSS_InteractionCooldownSpell12h.Cast(playerref, actor1)
+endFunction
+function InteractionCooldown24h(actor actor1)
+    IOSS_InteractionCooldownSpell24h.Cast(playerref, actor1)
 endFunction
