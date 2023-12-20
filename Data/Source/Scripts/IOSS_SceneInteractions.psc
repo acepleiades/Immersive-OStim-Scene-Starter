@@ -53,10 +53,10 @@ function SceneChatter(actor actor1)
         int newIntimacy = currentIntimacy + ((actor1.GetRelationshipRank(playerref) + 1) * 2)
         actor1.SetFactionRank(OCR_Lover_Value_Intimacy, newIntimacy)
         Util.Chatter(actor1)
-        AnimationPlayed = 1  ; Indicates the "Chatter" animation was played
+        AnimationPlayed = 1  ; Indicates the "Chatter" result
     else
         Util.ChatterFail(actor1)
-        AnimationPlayed = 2  ; Indicates the "ChatterFail" animation was played
+        AnimationPlayed = 2  ; Indicates the "ChatterFail" result
     endif
     SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -95,14 +95,14 @@ function SceneCourt(actor actor1)
                 actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
             endif
             Util.Court(actor1)
-            AnimationPlayed = 3  ; Indicates the "Court" animation was played
+            AnimationPlayed = 3  ; Indicates the "Court" result
         else
             Util.CourtFail(actor1)
-            AnimationPlayed = 4  ; Indicates the "CourtFail" animation was played
+            AnimationPlayed = 4  ; Indicates the "CourtFail" result
         endif
     Else
         Util.ChatterFail(actor1)
-        AnimationPlayed = 4  ; Indicates the "CourtFail" animation was played
+        AnimationPlayed = 4  ; Indicates the "CourtFail" result
     endIf
     SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -152,14 +152,14 @@ function SceneCaress(actor actor1)
             else
                 Util.CaressHug(actor1)
             endif
-            AnimationPlayed = 5  ; Indicates a "Caress" animation was played
+            AnimationPlayed = 5  ; Indicates a "Caress" result
         else
             Util.CaressFail(actor1)
-            AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+            AnimationPlayed = 6  ; Indicates the "CaressFail" result
         endif
     Else
         Util.CaressFail(actor1)
-        AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+        AnimationPlayed = 6  ; Indicates the "CaressFail" result
     endIf
     SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -174,18 +174,18 @@ function SceneKiss(actor actor1)
     bool WillingToKiss
     if actor1.GetAV("Morality") == 0
         WillingToKiss = true
-        MiscUtil.PrintConsole("NPC has Morality 0 and is willing to kiss anyone he or she finds attractive.")
+        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC has Morality 0 and is willing to kiss anyone he or she finds attractive.")
     elseIf (actor1.GetAV("Morality") == 1 && actor1Intimacy == 10)
         WillingToKiss = true
-        MiscUtil.PrintConsole("NPC has Morality 1 and requires a minimum Intimacy value of 10 for kissing.")
+        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC has Morality 1 and requires a minimum Intimacy value of 10 for kissing.")
     elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy == 20)
         WillingToKiss = true
-        MiscUtil.PrintConsole("NPC has Morality 2 and requires a minimum Intimacy value of 20 for kissing.")
+        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC has Morality 2 and requires a minimum Intimacy value of 20 for kissing.")
     elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy == 30)
         WillingToKiss = true
-        MiscUtil.PrintConsole("NPC has Morality 3 and requires a minimum Intimacy value of 30 for kissing.")
+        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC has Morality 3 and requires a minimum Intimacy value of 30 for kissing.")
     else
-        MiscUtil.PrintConsole("NPC is not willing to kiss due to low Intimacy.")
+        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC is not willing to kiss due to low Intimacy.")
     endif
     if WillingToKiss == true
         ;Automatic failure if attraction is too low
@@ -221,18 +221,18 @@ function SceneKiss(actor actor1)
                     actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
                 endif
                 Util.Kiss1(actor1) ; To do: adding lots of kissing animations for variety
-                AnimationPlayed = 7  ; Indicates a "kiss" animation was played
+                AnimationPlayed = 7  ; Indicates a "Kiss" result
             else
                 Util.CaressFail(actor1)
-                AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+                AnimationPlayed = 8  ; Indicates the "Kiss Fail" result
             endif
         Else
             Util.CaressFail(actor1)
-            AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+            AnimationPlayed = 8  ; Indicates the "Kiss Fail" result
         endIf
     Else
         Util.CaressFail(actor1)
-        AnimationPlayed = 6  ; Indicates the "CaressFail" animation was played
+        AnimationPlayed = 8  ; Indicates the "Kiss Fail" result
     endif
     SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -262,7 +262,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         GameHour.SetValue(newHour)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1000.0)
-        ;Interactions cooldown
+        ;Interactions cooldown of two in-game hours
         InteractionCooldown2h(SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Chatter_Fail1.Show()
@@ -289,7 +289,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         GameHour.SetValue(newHour)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1500.0)
-        ;Interactions cooldown
+        ;Interactions cooldown of two in-game hours
         InteractionCooldown2h(SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Court_Fail1.Show()
@@ -306,7 +306,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         ;Love gain notifications
         LoveGainNotification(SceneNPC.GetActorReference())
     elseif (AnimationPlayed == 6) ;Caress Fail
-        ;Interactions cooldown
+        ;Interactions cooldown of two in-game hours
         InteractionCooldown2h(SceneNPC.GetActorReference())
         ;Result message
         IOSS_SceneMSG_Caress_Fail1.Show()
@@ -322,6 +322,16 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         GameHour.SetValue(newHour)
         ;Love gain notifications
         LoveGainNotification(SceneNPC.GetActorReference())
+    elseif (AnimationPlayed == 8) ;Kiss Fail
+        ;Interactions cooldown of six in-game hours
+        InteractionCooldown6h(SceneNPC.GetActorReference())
+        ;Result message
+        IOSS_SceneMSG_Caress_Fail1.Show()
+        ;Tooltip for first failure
+        if (IOSS_ShownTooltip_CaressFail.GetValue()) == 0
+            IOSS_Tooltip_CaressFail.Show()
+            IOSS_ShownTooltip_CaressFail.SetValue(1)
+        endif
     endif
     ;Reset
     SceneNPC.Clear()
@@ -425,3 +435,17 @@ endFunction
 function InteractionCooldown24h(actor actor1)
     IOSS_InteractionCooldownSpell24h.Cast(playerref, actor1)
 endFunction
+
+;A function for calculating the interactions cooldown when the player failed to seduce NPC. The cooldown goes down with higher Intimacy.
+function RefusalCooldown_Seduce(actor actor1)
+    float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
+    if actor1Intimacy < 25
+        InteractionCooldown24h(actor1)
+    elseif actor1Intimacy < 50
+        InteractionCooldown12h(actor1)
+    elseif actor1Intimacy < 75
+        InteractionCooldown6h(actor1)
+    elseif actor1Intimacy < 100
+        InteractionCooldown2h(actor1)
+    endif
+endfunction
