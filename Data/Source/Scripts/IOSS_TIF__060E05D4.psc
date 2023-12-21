@@ -1,13 +1,12 @@
 ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
 ;NEXT FRAGMENT INDEX 1
-Scriptname IOSS_TIF__060E2D83 Extends TopicInfo Hidden
+Scriptname IOSS_TIF__060E05D4 Extends TopicInfo Hidden
 
 ;BEGIN FRAGMENT Fragment_0
 Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
-(GetOwningQuest() as OCR_PrivateCells_FollowDialogue).PrivateCell_SetFollower(akspeaker, true)
-(GetOwningQuest() as IOSS_SceneInteractions).FillOCRFollowAlias()
+Debug.Notification("This person does not find you attractive.")
 ;END CODE
 EndFunction
 ;END FRAGMENT
