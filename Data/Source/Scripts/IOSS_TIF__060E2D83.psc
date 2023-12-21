@@ -7,7 +7,6 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 (GetOwningQuest() as OCR_PrivateCells_FollowDialogue).PrivateCell_SetFollower(akspeaker, true)
-(GetOwningQuest() as IOSS_SceneInteractions).FillOCRFollowAlias()
 ;END CODE
 EndFunction
 ;END FRAGMENT
