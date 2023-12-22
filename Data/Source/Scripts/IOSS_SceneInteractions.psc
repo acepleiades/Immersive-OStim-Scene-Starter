@@ -2,6 +2,7 @@ Scriptname IOSS_SceneInteractions extends Quest
 
 Actor Property PlayerRef Auto
 Faction Property IOSS_Revealed_Attracted  Auto
+Faction Property OCR_Lover_PlayerCommittedRelationshipFaction  Auto
 Faction Property OCR_Lover_Value_Intimacy  Auto
 Faction Property OCR_Lover_Value_Love  Auto
 GlobalVariable Property GameHour  auto
@@ -32,6 +33,7 @@ SPELL Property IOSS_OfCourseCooldownSpell  Auto
 Int property AnimationPlayed Auto
 
 function SceneChatter(actor actor1)
+    SceneNPC.Clear()
     ;Add the NPC to the Intimacy faction, this does nothing if he or she is already in it
     actor1.AddToFaction(OCR_Lover_Value_Intimacy)
     ;Calculate the success rate for this interaction
@@ -65,6 +67,7 @@ function SceneChatter(actor actor1)
 endFunction
 
 function SceneCourt(actor actor1)
+    SceneNPC.Clear()
     ;Add the NPC to the Love faction, this does nothing if he or she is already in it
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Automatic failure if attraction is too low
@@ -113,6 +116,7 @@ function SceneCourt(actor actor1)
 endFunction
 
 function SceneCaress(actor actor1)
+    SceneNPC.Clear()
     ;Add the NPC to the Love faction, this does nothing if he or she is already in it
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, caressing may require a minimum Intimacy value
@@ -130,6 +134,7 @@ function SceneCaress(actor actor1)
     else
         MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC is not willing to be caressed due to low Intimacy.")
     endif
+
     if WillingToBeCaressed == true
         ;Automatic failure if attraction is too low
         if OCR_CurrentAttraction.GetValue() > 0.85
@@ -192,6 +197,7 @@ function SceneCaress(actor actor1)
 endFunction
 
 function SceneKiss(actor actor1)
+    SceneNPC.Clear()
     ;Add the NPC to the Love faction, this does nothing if he or she is already in it
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, kissing may require a minimum Intimacy value
@@ -202,12 +208,12 @@ function SceneKiss(actor actor1)
     bool WillingToKiss
     if actor1.GetAV("Morality") == 0
         WillingToKiss = true
-    elseIf (actor1.GetAV("Morality") == 1 && actor1Intimacy >= 5)
+    elseIf actor1.GetAV("Morality") == 1 && actor1Intimacy >= 5
         WillingToKiss = true
-    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy >= 10)
+    elseif actor1.GetAV("Morality") >= 2 && actor1.IsInFaction(OCR_Lover_PlayerCommittedRelationshipFaction) == 1 && actor1Intimacy >= 10
         WillingToKiss = true
-    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 20)
-        WillingToKiss = true
+    Else
+        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC is not willing to be kissed due to low Intimacy or not being in a committed relationship.")
     endif
     if WillingToKiss == true
         ;Automatic failure if attraction is too low
