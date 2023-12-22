@@ -135,6 +135,7 @@ function Relationship_BreakUp(actor actor1)
     	actor1.AddToFaction(OCR_Lover_State_Upset)
     	actor1.SetFactionRank(OCR_Lover_State_Upset, 2)
     	IOSS_Relationship_BreakUp_Upset.Show()
+    	Debug.Notification("Your partner is upset.")
     endif
 endfunction
 function Relationship_Reconcile(actor actor1)
@@ -274,6 +275,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     	IOSS_Relationship_Reconcile_Fail.Show()
     elseif (Query == 8) ;Apology Success
     	actor actor1 = SceneNPC.GetActorReference()
+    	actor1.RemoveFromFaction(OCR_Lover_PlayerCheatedFaction)
     	actor1.RemoveFromFaction(OCR_Lover_State_Upset)
     	IOSS_Relationship_Reconcile_Success.Show()
     	Debug.Notification("Your partner is no longer upset.")
