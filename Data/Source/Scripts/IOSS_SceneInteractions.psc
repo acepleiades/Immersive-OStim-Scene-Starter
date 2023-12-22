@@ -4,9 +4,6 @@ Actor Property PlayerRef Auto
 Faction Property IOSS_Revealed_Attracted  Auto
 Faction Property OCR_Lover_Value_Intimacy  Auto
 Faction Property OCR_Lover_Value_Love  Auto
-Faction Property OCR_Trait_EnthusiastArcane  Auto
-Faction Property OCR_Trait_EnthusiastEscapade  Auto
-Faction Property OCR_Trait_EnthusiastMartial  Auto
 GlobalVariable Property GameHour  auto
 GlobalVariable Property IOSS_ShownTooltip_CaressFail  Auto
 GlobalVariable Property IOSS_ShownTooltip_ChatterFail  Auto
@@ -265,32 +262,6 @@ function SceneKiss(actor actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 
-;Inquire interactions are for learning information about the NPC.
-function Inquire_Interests(actor actor1)
-    Util.StandingConversationLoop(actor1)
-    AnimationPlayed = 9 ; Indicates the "Inquire_Interests" result
-    SceneNPC.ForceRefTo(actor1)
-    RegisterForModEvent("ostim_end", "OStimEnd")
-endfunction
-function Inquire_Morality(actor actor1)
-    Util.StandingConversationLoop(actor1)
-    AnimationPlayed = 10 ; Indicates the "Inquire_Morality" result
-    SceneNPC.ForceRefTo(actor1)
-    RegisterForModEvent("ostim_end", "OStimEnd")
-endfunction
-function Inquire_SocialClass(actor actor1)
-    Util.StandingConversationLoop(actor1)
-    AnimationPlayed = 11 ; Indicates the "Inquire_SocialClass" result
-    SceneNPC.ForceRefTo(actor1)
-    RegisterForModEvent("ostim_end", "OStimEnd")
-endfunction
-function Inquire_MultiplePartners(actor actor1)
-    Util.StandingConversationLoop(actor1)
-    AnimationPlayed = 12 ; Indicates the "Inquire_MultiplePartners" result
-    SceneNPC.ForceRefTo(actor1)
-    RegisterForModEvent("ostim_end", "OStimEnd")
-endfunction
-
 Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     Utility.Wait(0.5)
     ;Display the message after the scene
@@ -394,27 +365,6 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             IOSS_Tooltip_CaressFail.Show()
             IOSS_ShownTooltip_CaressFail.SetValue(1)
         endif
-    elseif (AnimationPlayed == 9) ;Inquire_Interests
-        ;Check for the Enthusiast faction
-        actor actor1 = SceneNPC.GetActorReference()
-        if actor1.IsInFaction(OCR_Trait_EnthusiastArcane)
-        ElseIf actor1.IsInFaction(OCR_Trait_EnthusiastEscapade)
-        ElseIf actor1.IsInFaction(OCR_Trait_EnthusiastMartial)
-        endif
-        ;Result message
-        IOSS_SceneMSG_Caress_Fail1.Show()
-    elseif (AnimationPlayed == 10) ;Inquire_Morality
-        actor actor1 = SceneNPC.GetActorReference()
-        ;Result message
-        IOSS_SceneMSG_Caress_Fail1.Show()
-    elseif (AnimationPlayed == 11) ;Inquire_SocialClass
-        actor actor1 = SceneNPC.GetActorReference()
-        ;Result message
-        IOSS_SceneMSG_Caress_Fail1.Show()
-    elseif (AnimationPlayed == 12) ;Inquire_MultiplePartners
-        actor actor1 = SceneNPC.GetActorReference()
-        ;Result message
-        IOSS_SceneMSG_Caress_Fail1.Show()
     endif
     ;Reset
     SceneNPC.Clear()
