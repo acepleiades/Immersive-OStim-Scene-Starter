@@ -34,21 +34,21 @@ Int property AnimationPlayed Auto
 
 function SceneChatter(actor actor1)
     SceneNPC.Clear()
-    ;Add the NPC to the Intimacy faction, this does nothing if he or she is already in it
+    SceneNPC.ForceRefTo(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Intimacy)
     ;Calculate the success rate for this interaction
     float Bonus_AttractionSpeech = ((OCR_CurrentAttraction.GetValue() + 1) * ((playerref.GetAV("Speechcraft"))))
     float Bonus_Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
     float Bonus_RelationshipRank = ((actor1.GetRelationshipRank(playerref) + 1) * 12.5)
     float SuccessChance = Bonus_AttractionSpeech + Bonus_Intimacy + Bonus_RelationshipRank
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_AttractionSpeech is " + Bonus_AttractionSpeech)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Intimacy is " + Bonus_Intimacy)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_RelationshipRank is " + Bonus_RelationshipRank)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: Success rate for this interaction is " + SuccessChance)
+    MiscUtil.PrintConsole("SceneChatter: Bonus_AttractionSpeech is " + Bonus_AttractionSpeech)
+    MiscUtil.PrintConsole("SceneChatter: Bonus_Intimacy is " + Bonus_Intimacy)
+    MiscUtil.PrintConsole("SceneChatter: Bonus_RelationshipRank is " + Bonus_RelationshipRank)
+    MiscUtil.PrintConsole("SceneChatter: Success rate for this interaction is " + SuccessChance)
     ;Now, "roll the dice"
     float RandomChance = Utility.RandomFloat(0, 100)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: 'Dice roll' is " + RandomChance)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: See that the 'dice roll' has to be lower than the success rate to succeed.")
+    MiscUtil.PrintConsole("SceneChatter: 'Dice roll' is " + RandomChance)
+    MiscUtil.PrintConsole("SceneChatter: See that the 'dice roll' has to be lower than the success rate to succeed.")
     if RandomChance < SuccessChance
     ;If it was successful
         int currentIntimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
@@ -62,13 +62,12 @@ function SceneChatter(actor actor1)
         Util.ChatterFail(actor1)
         AnimationPlayed = 2  ; Indicates the "ChatterFail" result
     endif
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 
 function SceneCourt(actor actor1)
     SceneNPC.Clear()
-    ;Add the NPC to the Love faction, this does nothing if he or she is already in it
+    SceneNPC.ForceRefTo(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Automatic failure if attraction is too low
     if OCR_CurrentAttraction.GetValue() > 0.85
@@ -77,14 +76,14 @@ function SceneCourt(actor actor1)
         float Bonus_Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
         float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 5)
         float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Attraction is " + Bonus_Attraction)
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Love is " + Bonus_Love)
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Speechcraft is " + Bonus_Speechcraft)
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: Success rate for this interaction is " + SuccessChance)
+        MiscUtil.PrintConsole("SceneCourt: Bonus_Attraction is " + Bonus_Attraction)
+        MiscUtil.PrintConsole("SceneCourt: Bonus_Love is " + Bonus_Love)
+        MiscUtil.PrintConsole("SceneCourt: Bonus_Speechcraft is " + Bonus_Speechcraft)
+        MiscUtil.PrintConsole("SceneCourt: Success rate for this interaction is " + SuccessChance)
         ;Now, "roll the dice"
         float RandomChance = Utility.RandomFloat(0, 100)
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: 'Dice roll' is " + RandomChance)
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: See that the 'dice roll' has to be lower than the success rate to succeed.")
+        MiscUtil.PrintConsole("SceneCourt: 'Dice roll' is " + RandomChance)
+        MiscUtil.PrintConsole("SceneCourt: See that the 'dice roll' has to be lower than the success rate to succeed.")
         if RandomChance < SuccessChance
             ;If it was successful
             ;Courting has diminishing returns on Love increase
@@ -111,19 +110,18 @@ function SceneCourt(actor actor1)
         Util.ChatterFail(actor1)
         AnimationPlayed = 4  ; Indicates the "CourtFail" result
     endIf
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 
 function SceneCaress(actor actor1)
     SceneNPC.Clear()
-    ;Add the NPC to the Love faction, this does nothing if he or she is already in it
+    SceneNPC.ForceRefTo(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, caressing may require a minimum Intimacy value
     float actor1Morality  = actor1.GetAV("Morality")
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC's Morality is " + actor1Morality)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC's actor1Intimacy is " + actor1Intimacy)
+    MiscUtil.PrintConsole("SceneCaress: NPC's Morality is " + actor1Morality)
+    MiscUtil.PrintConsole("SceneCaress: NPC's actor1Intimacy is " + actor1Intimacy)
     bool WillingToBeCaressed
     if actor1.GetAV("Morality") <= 1
         WillingToBeCaressed = true
@@ -132,7 +130,7 @@ function SceneCaress(actor actor1)
     elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 10)
         WillingToBeCaressed = true
     else
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC is not willing to be caressed due to low Intimacy.")
+        MiscUtil.PrintConsole("SceneCaress: NPC is not willing to be caressed due to low Intimacy.")
     endif
 
     if WillingToBeCaressed == true
@@ -143,14 +141,14 @@ function SceneCaress(actor actor1)
             float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.1)
             float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 5)
             float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Attraction is " + Bonus_Attraction)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Love is " + Bonus_Love)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Speechcraft is " + Bonus_Speechcraft)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Success rate for this interaction is " + SuccessChance)
+            MiscUtil.PrintConsole("SceneCaress: Bonus_Attraction is " + Bonus_Attraction)
+            MiscUtil.PrintConsole("SceneCaress: Bonus_Love is " + Bonus_Love)
+            MiscUtil.PrintConsole("SceneCaress: Bonus_Speechcraft is " + Bonus_Speechcraft)
+            MiscUtil.PrintConsole("SceneCaress: Success rate for this interaction is " + SuccessChance)
             ;Now, "roll the dice"
             float RandomChance = Utility.RandomFloat(0, 100)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: 'Dice roll' is " + RandomChance)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: See that the 'dice roll' has to be lower than the success rate to succeed.")
+            MiscUtil.PrintConsole("SceneCaress: 'Dice roll' is " + RandomChance)
+            MiscUtil.PrintConsole("SceneCaress: See that the 'dice roll' has to be lower than the success rate to succeed.")
             if RandomChance < SuccessChance
                 ;If it was successful
                 ;Caressing has diminishing returns on Love increase
@@ -192,19 +190,18 @@ function SceneCaress(actor actor1)
         Util.CaressFail(actor1)
         AnimationPlayed = 6  ; Indicates the "CaressFail" result
     endIf
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 
 function SceneKiss(actor actor1)
     SceneNPC.Clear()
-    ;Add the NPC to the Love faction, this does nothing if he or she is already in it
+    SceneNPC.ForceRefTo(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, kissing may require a minimum Intimacy value
     float actor1Morality  = actor1.GetAV("Morality")
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC's Morality is " + actor1Morality)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC's actor1Intimacy is " + actor1Intimacy)
+    MiscUtil.PrintConsole("SceneKiss: NPC's Morality is " + actor1Morality)
+    MiscUtil.PrintConsole("SceneKiss: NPC's actor1Intimacy is " + actor1Intimacy)
     bool WillingToKiss
     if actor1.GetAV("Morality") == 0
         WillingToKiss = true
@@ -213,24 +210,24 @@ function SceneKiss(actor actor1)
     elseif actor1.GetAV("Morality") >= 2 && actor1.IsInFaction(OCR_Lover_PlayerCommittedRelationshipFaction) == 1 && actor1Intimacy >= 10
         WillingToKiss = true
     Else
-        MiscUtil.PrintConsole("IOSS_SceneInteractions: NPC is not willing to be kissed due to low Intimacy or not being in a committed relationship.")
+        MiscUtil.PrintConsole("SceneKiss: NPC is not willing to be kissed due to low Intimacy or not being in a committed relationship.")
     endif
     if WillingToKiss == true
         ;Automatic failure if attraction is too low
         if OCR_CurrentAttraction.GetValue() > 0.85
             ;Calculate the success rate for this interaction
             float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 15)
-            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.3)
+            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.5)
             float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 10)
             float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Attraction is " + Bonus_Attraction)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Love is " + Bonus_Love)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Bonus_Speechcraft is " + Bonus_Speechcraft)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: Success rate for this interaction is " + SuccessChance)
+            MiscUtil.PrintConsole("SceneKiss: Bonus_Attraction is " + Bonus_Attraction)
+            MiscUtil.PrintConsole("SceneKiss: Bonus_Love is " + Bonus_Love)
+            MiscUtil.PrintConsole("SceneKiss: Bonus_Speechcraft is " + Bonus_Speechcraft)
+            MiscUtil.PrintConsole("SceneKiss: Success rate for this interaction is " + SuccessChance)
             ;Now, "roll the dice"
             float RandomChance = Utility.RandomFloat(0, 100)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: 'Dice roll' is " + RandomChance)
-            MiscUtil.PrintConsole("IOSS_SceneInteractions: See that the 'dice roll' has to be lower than the success rate to succeed.")
+            MiscUtil.PrintConsole("SceneKiss: 'Dice roll' is " + RandomChance)
+            MiscUtil.PrintConsole("SceneKiss: See that the 'dice roll' has to be lower than the success rate to succeed.")
             if RandomChance < SuccessChance
                 ;If it was successful
                 ;Kissing has diminishing returns on Love increase
@@ -264,7 +261,6 @@ function SceneKiss(actor actor1)
         Util.CaressFail(actor1)
         AnimationPlayed = 8  ; Indicates the "Kiss Fail" result
     endif
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 
@@ -272,13 +268,13 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     Utility.Wait(0.5)
     ;Display the message after the scene
     if (AnimationPlayed == 1) ;Chatter Success
+        ;Intimacy gain notifications
+        actor actor1 = SceneNPC.GetActorReference()
+        IntimacyGainNotification(actor1)
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
         float newHour = currentHour + 1.5
         GameHour.SetValue(newHour)
-        ;Intimacy gain notifications
-        actor actor1 = SceneNPC.GetActorReference()
-        IntimacyGainNotification(actor1)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 200.0)
         ;Result messages
@@ -302,12 +298,13 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             IOSS_ShownTooltip_ChatterFail.SetValue(1)
         endif
     elseif (AnimationPlayed == 3) ;Court Success
+        ;Love gain notifications
+        actor actor1 = SceneNPC.GetActorReference()
+        LoveGainNotification(actor1)
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
         float newHour = currentHour + 1.5
         GameHour.SetValue(newHour)
-        ;Love gain notifications
-        LoveGainNotification(SceneNPC.GetActorReference())
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 300.0)
         ;Result message
@@ -329,12 +326,13 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             IOSS_ShownTooltip_CourtFail.SetValue(1)
         endif
     elseif (AnimationPlayed == 5) ;Caress Success
+        ;Love gain notifications
+        actor actor1 = SceneNPC.GetActorReference()
+        LoveGainNotification(actor1)
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
         float newHour = currentHour + 0.5
         GameHour.SetValue(newHour)
-        ;Love gain notifications
-        LoveGainNotification(SceneNPC.GetActorReference())
     elseif (AnimationPlayed == 6) ;Caress Fail
         ;Interactions cooldown of two in-game hours
         InteractionCooldown2h(SceneNPC.GetActorReference())
@@ -346,12 +344,13 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             IOSS_ShownTooltip_CaressFail.SetValue(1)
         endif
     elseif (AnimationPlayed == 7) ;Kiss Success
+        ;Love gain notifications
+        actor actor1 = SceneNPC.GetActorReference()
+        LoveGainNotification(actor1)
         ;Skip time based on result
         float currentHour = GameHour.GetValue()
         float newHour = currentHour + 0.5
         GameHour.SetValue(newHour)
-        ;Love gain notifications
-        LoveGainNotification(SceneNPC.GetActorReference())
     elseif (AnimationPlayed == 8) ;Kiss Fail
         ;Interactions cooldown that goes down with higher Intimacy
         actor actor1 = SceneNPC.GetActorReference()
@@ -373,7 +372,6 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         endif
     endif
     ;Reset
-    SceneNPC.Clear()
     AnimationPlayed = 0
 EndEvent
 
@@ -478,11 +476,11 @@ endFunction
 ;A function for calculating the interactions cooldown when the player failed to seduce NPC. The cooldown goes down with higher Intimacy.
 function RefusalCooldown_Seduce(actor actor1)
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-    if actor1Intimacy < 20
+    if actor1Intimacy < 5
         InteractionCooldown24h(actor1)
-    elseif actor1Intimacy < 40
+    elseif actor1Intimacy < 15
         InteractionCooldown12h(actor1)
-    elseif actor1Intimacy < 80
+    elseif actor1Intimacy < 45
         InteractionCooldown6h(actor1)
     else
         InteractionCooldown2h(actor1)

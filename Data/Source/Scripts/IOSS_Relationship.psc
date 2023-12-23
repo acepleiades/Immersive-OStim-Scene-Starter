@@ -72,88 +72,106 @@ endfunction
 ;Inquire interactions are for learning information about the NPC.
 function Inquire_Interests(actor actor1)
     SceneNPC.Clear()
+    SceneNPC.ForceRefTo(actor1)
 	TooltipEndAnimation()
     Util.StandingConversation(actor1)
     Query = 1
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endfunction
 function Inquire_SocialClass(actor actor1)
     SceneNPC.Clear()
+    SceneNPC.ForceRefTo(actor1)
 	TooltipEndAnimation()
     Util.StandingConversation(actor1)
     Query = 2
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endfunction
 function Inquire_Commitment(actor actor1)
     SceneNPC.Clear()
+    SceneNPC.ForceRefTo(actor1)
 	TooltipEndAnimation()
     Util.StandingConversation(actor1)
     Query = 3
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endfunction
 function Relationship_GoSteady(actor actor1)
     SceneNPC.Clear()
+    SceneNPC.ForceRefTo(actor1)
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
     float actor1Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
-	if OCR_CurrentAttraction.GetValue() > 1.3 && actor1Intimacy > 5 && actor1Love > 0
+	if OCR_CurrentAttraction.GetValue() > 1.5 && actor1Intimacy > 5 && actor1Love > 0
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is higher than 1.5, requirement was 5 Intimacy and positive Love.")
 		Util.Court(actor1)
 		Query = 4
 	ElseIf OCR_CurrentAttraction.GetValue() > 1.15 && actor1Intimacy > 10 && actor1Love > 5
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.5 and > 1.15, requirement was 10 Intimacy and 5 Love.")
 		Util.Court(actor1)
 		Query = 4
 	elseif OCR_CurrentAttraction.GetValue() > 1 && actor1Intimacy > 15 && actor1Love > 10
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.15 and > 1, requirement was 15 Intimacy and 10 Love.")
 		Util.Court(actor1)
 		Query = 4
 	elseif OCR_CurrentAttraction.GetValue() > 0.85 && actor1Intimacy > 20 && actor1Love > 15
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1 and > 0.85, requirement was 20 Intimacy and 15 Love.")
 		Util.Court(actor1)
 		Query = 4
 	else
+        MiscUtil.PrintConsole("Relationship_GoSteady: Did not match the required Attraction, Intimacy and/or Love.")
 		Util.CourtFail(actor1)
 		Query = 5
 	endif
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endfunction
 function Relationship_BreakUp(actor actor1)
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
     if actor1Intimacy > 50
+        ;Apply interactions cooldown
     	Rel_InteractionCooldown24h(actor1)
+        MiscUtil.PrintConsole("Relationship_BreakUp: NPC is not upset because Intimacy is > 50.")
+        ;Update factions
     	actor1.SetFactionRank(OCR_Lover_Value_Love, 0)
     	actor1.RemoveFromFaction(OCR_Lover_Value_Love)
     	actor1.RemoveFromFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
     	actor1.AddToFaction(OCR_Lover_PlayerBrokeUpFaction)
+        ;Message and notification
     	IOSS_Relationship_BreakUp_NotUpset.Show()
+        Debug.Notification("Your partner is no longer committed to you.")
     else
+        MiscUtil.PrintConsole("Relationship_BreakUp: NPC is upset because Intimacy is < 50.")
+        ;Make NPC upset and apply interactions cooldown
     	Rel_InteractionCooldown24h(actor1)
+        MakeUpset(actor1, 2)
+        ;Update factions
     	actor1.SetFactionRank(OCR_Lover_Value_Love, 0)
     	actor1.RemoveFromFaction(OCR_Lover_Value_Love)
     	actor1.RemoveFromFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
     	actor1.AddToFaction(OCR_Lover_PlayerBrokeUpFaction)
     	actor1.AddToFaction(OCR_Lover_State_Upset)
-    	actor1.SetFactionRank(OCR_Lover_State_Upset, 2)
+        ;Message and notifications
     	IOSS_Relationship_BreakUp_Upset.Show()
+        Debug.Notification("Your partner is no longer committed to you.")
     	Debug.Notification("Your partner is upset.")
     endif
 endfunction
 function Relationship_Reconcile(actor actor1)
     SceneNPC.Clear()
+    SceneNPC.ForceRefTo(actor1)
     ; Calculate the success rate for reconciliation
+    float Penalty_Commitment = actor1.GetFactionRank(OCR_Lover_Commitment) * -20
     float Bonus_Attraction = OCR_CurrentAttraction.GetValue() * 15
     float Bonus_Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy) / 2
     float Bonus_Speechcraft = playerref.GetAV("Speechcraft") / 3
-    float Penalty_Commitment = actor1.GetFactionRank(OCR_Lover_Commitment) * -20
     float SuccessChance = actor1.GetFactionRank(OCR_Lover_Commitment) + Bonus_Intimacy + Bonus_Speechcraft
-    MiscUtil.PrintConsole("IOSS_Relationship: Bonus_Attraction is " + Bonus_Attraction)
-    MiscUtil.PrintConsole("IOSS_Relationship: Bonus_Intimacy is " + Bonus_Intimacy)
-    MiscUtil.PrintConsole("IOSS_Relationship: Bonus_Speechcraft is " + Bonus_Speechcraft)
-    MiscUtil.PrintConsole("IOSS_SceneInteractions: See that the 'dice roll' has to be lower than the success rate to succeed.")
+    MiscUtil.PrintConsole("Relationship_Reconcile: Penalty_Commitment is " + Penalty_Commitment)
+    MiscUtil.PrintConsole("Relationship_Reconcile: Bonus_Attraction is " + Bonus_Attraction)
+    MiscUtil.PrintConsole("Relationship_Reconcile: Bonus_Intimacy is " + Bonus_Intimacy)
+    MiscUtil.PrintConsole("Relationship_Reconcile: Bonus_Speechcraft is " + Bonus_Speechcraft)
+    MiscUtil.PrintConsole("Relationship_Apologize: Success Chance for Apology is " + SuccessChance)
+    MiscUtil.PrintConsole("Relationship_Reconcile: See that the 'dice roll' has to be lower than the success rate to succeed.")
     ; "Roll the dice"
     float RandomChance = Utility.RandomFloat(0, 100)
-    MiscUtil.PrintConsole("IOSS_Relationship: 'Dice roll' is " + RandomChance)
-    MiscUtil.PrintConsole("IOSS_Relationship: See that the 'dice roll' must be lower than the success rate to succeed.")
+    MiscUtil.PrintConsole("Relationship_Reconcile: 'Dice roll' is " + RandomChance)
+    MiscUtil.PrintConsole("Relationship_Reconcile: See that the 'dice roll' must be lower than the success rate to succeed.")
     if RandomChance < SuccessChance
         Util.Chatter(actor1)
         Query = 6  ; Indicates a "Reconciliation Success" result
@@ -165,31 +183,28 @@ function Relationship_Reconcile(actor actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 function Relationship_Apologize(actor actor1)
-    ; Initialize variables
-    float SuccessChance = 0
-    float Penalty_UpsetLevel = actor1.GetFactionRank(OCR_Lover_State_Upset) * 20
+    ; Calculate the success rate for apology
+    float Penalty_UpsetLevel = actor1.GetFactionRank(OCR_Lover_State_Upset) * 15
     float Penalty_Cheating = 0
     ; Check for cheating penalty
     if actor1.IsInFaction(OCR_Lover_PlayerCheatedFaction) && actor1.GetFactionRank(OCR_Lover_Commitment) > 0
-        Penalty_Cheating = actor1.GetFactionRank(OCR_Lover_PlayerCheatedFaction) * -30
-    	MiscUtil.PrintConsole("IOSS_Relationship: Player has cheated.")
+        Penalty_Cheating = actor1.GetFactionRank(OCR_Lover_PlayerCheatedFaction) * 30
+    	MiscUtil.PrintConsole("Relationship_Apologize: Player has cheated.")
     endif
-    ; Calculate success chance
     float Bonus_Speechcraft = playerref.GetAV("Speechcraft") / 4
-    SuccessChance = 100 - Penalty_UpsetLevel + Bonus_Speechcraft + Penalty_Cheating
-    ; Ensure success chance is not negative
+    float SuccessChance = 100 - Penalty_UpsetLevel - Penalty_Cheating + Bonus_Speechcraft
+    ; Minimum 5% chance
     if SuccessChance < 0
-        SuccessChance = 0
+        SuccessChance = 5
     endif
-    ; Print debug information
-    MiscUtil.PrintConsole("IOSS_Relationship: Penalty_UpsetLevel is " + Penalty_UpsetLevel)
-    MiscUtil.PrintConsole("IOSS_Relationship: Penalty_Cheating is " + Penalty_Cheating)
-    MiscUtil.PrintConsole("IOSS_Relationship: Bonus_Speechcraft is " + Bonus_Speechcraft)
-    MiscUtil.PrintConsole("IOSS_Relationship: Success Chance for Apology is " + SuccessChance)
+    MiscUtil.PrintConsole("Relationship_Apologize: Penalty_UpsetLevel is " + Penalty_UpsetLevel)
+    MiscUtil.PrintConsole("Relationship_Apologize: Penalty_Cheating is " + Penalty_Cheating)
+    MiscUtil.PrintConsole("Relationship_Apologize: Bonus_Speechcraft is " + Bonus_Speechcraft)
+    MiscUtil.PrintConsole("Relationship_Apologize: Success Chance for Apology is " + SuccessChance)
     ; "Roll the dice"
     float RandomChance = Utility.RandomFloat(0, 100)
-    MiscUtil.PrintConsole("IOSS_Relationship: 'Dice roll' is " + RandomChance)
-    MiscUtil.PrintConsole("IOSS_Relationship: See that the 'dice roll' must be lower than the success rate to succeed.")
+    MiscUtil.PrintConsole("Relationship_Apologize: 'Dice roll' is " + RandomChance)
+    MiscUtil.PrintConsole("Relationship_Apologize: See that the 'dice roll' must be lower than the success rate to succeed.")
     if RandomChance < SuccessChance
         Util.Chatter(actor1)
         Query = 8  ; Indicates an "Apology Success" result
@@ -197,7 +212,6 @@ function Relationship_Apologize(actor actor1)
         Util.ChatterFail(actor1)
         Query = 9  ; Indicates an "Apology Fail" result
     endif
-    SceneNPC.ForceRefTo(actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 
@@ -277,7 +291,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     	actor actor1 = SceneNPC.GetActorReference()
     	actor1.RemoveFromFaction(OCR_Lover_PlayerCheatedFaction)
     	actor1.RemoveFromFaction(OCR_Lover_State_Upset)
-    	IOSS_Relationship_Reconcile_Success.Show()
+    	IOSS_Relationship_Apologize_Success.Show()
     	Debug.Notification("Your partner is no longer upset.")
     elseif (Query == 9) ;Apology Fail
     	actor actor1 = SceneNPC.GetActorReference()
@@ -290,12 +304,19 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 1
     		Rel_InteractionCooldown2h(actor1)
     	endif
-    	IOSS_Relationship_Reconcile_Success.Show()
+    	IOSS_Relationship_Apologize_Fail.Show()
     endif
     ;Reset
-    SceneNPC.Clear()
     Query = 0
 EndEvent
+
+function MakeUpset(actor actor1, int UpsetLevel)
+    if UpsetLevel >= 0 && UpsetLevel <= 4
+        actor1.SetFactionRank(OCR_Lover_State_Upset, UpsetLevel)
+    else
+        Debug.Notification("MakeUpset: Passed UpsetLevel " + UpsetLevel + " is not valid.")
+    endif
+endFunction
 
 function Rel_InteractionCooldown2h(actor actor1)
     IOSS_InteractionCooldownSpell2h.Cast(playerref, actor1)

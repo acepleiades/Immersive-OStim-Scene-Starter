@@ -7,6 +7,7 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 Debug.Notification("This person does not find you attractive.")
+(GetOwningQuest() as IOSS_SceneInteractions).RefusalCooldown_Seduce(akspeaker)
 ;END CODE
 EndFunction
 ;END FRAGMENT

@@ -7,6 +7,7 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 Debug.Notification("A stronger lover relationship is required.")
+(GetOwningQuest() as IOSS_SceneInteractions).RefusalCooldown_Seduce(akspeaker)
 ;END CODE
 EndFunction
 ;END FRAGMENT
