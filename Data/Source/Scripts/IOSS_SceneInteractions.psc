@@ -473,16 +473,18 @@ function InteractionCooldown24h(actor actor1)
     IOSS_InteractionCooldownSpell24h.Cast(playerref, actor1)
 endFunction
 
-;A function for calculating the interactions cooldown when the player failed to seduce NPC. The cooldown goes down with higher Intimacy.
+;A function for calculating the interactions cooldown when the player failed to seduce NPC. The cooldown goes down with higher Intimacy. No cooldown is applied if NPC is committed to the player.
 function RefusalCooldown_Seduce(actor actor1)
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-    if actor1Intimacy < 5
-        InteractionCooldown24h(actor1)
-    elseif actor1Intimacy < 15
-        InteractionCooldown12h(actor1)
-    elseif actor1Intimacy < 45
-        InteractionCooldown6h(actor1)
-    else
-        InteractionCooldown2h(actor1)
+    if actor1.IsInFaction(OCR_Lover_PlayerCommittedRelationshipFaction) == 0
+        if actor1Intimacy < 5
+            InteractionCooldown24h(actor1)
+        elseif actor1Intimacy < 15
+            InteractionCooldown12h(actor1)
+        elseif actor1Intimacy < 45
+            InteractionCooldown6h(actor1)
+        else
+            InteractionCooldown2h(actor1)
+        endif
     endif
 endfunction

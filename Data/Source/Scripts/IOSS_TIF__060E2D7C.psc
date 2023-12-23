@@ -6,7 +6,7 @@ Scriptname IOSS_TIF__060E2D7C Extends TopicInfo Hidden
 Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
-Debug.Notification("It is currently too early to make conversation.")
+Debug.Notification("It is currently too late to make conversation.")
 ;END CODE
 EndFunction
 ;END FRAGMENT

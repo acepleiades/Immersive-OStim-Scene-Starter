@@ -1,6 +1,7 @@
 Scriptname IOSS_Relationship extends Quest  
 
 Actor Property PlayerRef Auto
+Faction Property IOSS_DispositionBeforeUpset  Auto
 Faction Property OCR_Lover_AcceptsMultiplePartnersFaction  Auto
 Faction Property OCR_Lover_Commitment  Auto
 Faction Property OCR_Lover_PlayerBrokeUpFaction Auto
@@ -172,6 +173,11 @@ function Relationship_Reconcile(actor actor1)
     float RandomChance = Utility.RandomFloat(0, 100)
     MiscUtil.PrintConsole("Relationship_Reconcile: 'Dice roll' is " + RandomChance)
     MiscUtil.PrintConsole("Relationship_Reconcile: See that the 'dice roll' must be lower than the success rate to succeed.")
+    ; Minimum 5% chance
+    if SuccessChance < 0
+        SuccessChance = 5
+        MiscUtil.PrintConsole("Relationship_Reconcile: Applied minimum success chance of 5%.")
+    endif
     if RandomChance < SuccessChance
         Util.Chatter(actor1)
         Query = 6  ; Indicates a "Reconciliation Success" result
@@ -196,6 +202,7 @@ function Relationship_Apologize(actor actor1)
     ; Minimum 5% chance
     if SuccessChance < 0
         SuccessChance = 5
+        MiscUtil.PrintConsole("Relationship_Reconcile: Applied minimum success chance of 5%.")
     endif
     MiscUtil.PrintConsole("Relationship_Apologize: Penalty_UpsetLevel is " + Penalty_UpsetLevel)
     MiscUtil.PrintConsole("Relationship_Apologize: Penalty_Cheating is " + Penalty_Cheating)
@@ -278,7 +285,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     	endif
     elseif (Query == 6) ;Reconciliation Success
     	actor actor1 = SceneNPC.GetActorReference()
-    	actor1.AddToFaction(OCR_Lover_Value_Love)
+        actor1.SetFactionRank(OCR_Lover_Value_Love, 1)
     	actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
     	actor1.RemoveFromFaction(OCR_Lover_PlayerBrokeUpFaction)
     	IOSS_Relationship_Reconcile_Success.Show()
@@ -291,18 +298,23 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     	actor actor1 = SceneNPC.GetActorReference()
     	actor1.RemoveFromFaction(OCR_Lover_PlayerCheatedFaction)
     	actor1.RemoveFromFaction(OCR_Lover_State_Upset)
+        RestoreDisposition(actor1)
     	IOSS_Relationship_Apologize_Success.Show()
     	Debug.Notification("Your partner is no longer upset.")
     elseif (Query == 9) ;Apology Fail
     	actor actor1 = SceneNPC.GetActorReference()
     	if actor1.GetFactionRank(OCR_Lover_State_Upset) == 4
     		Rel_InteractionCooldown24h(actor1)
+            MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 4, applying 24-hours interactions cooldown.")
     	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 3
     		Rel_InteractionCooldown12h(actor1)
+            MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 3, applying 12-hours interactions cooldown.")
     	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 2
     		Rel_InteractionCooldown6h(actor1)
+            MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 2, applying 6-hours interactions cooldown.")
     	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 1
     		Rel_InteractionCooldown2h(actor1)
+            MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 1, applying 2-hours interactions cooldown.")
     	endif
     	IOSS_Relationship_Apologize_Fail.Show()
     endif
@@ -311,12 +323,28 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
 EndEvent
 
 function MakeUpset(actor actor1, int UpsetLevel)
+    ;This function will temporarily lower the disposition of the NPC to the player. First, we must store the value to be restored
+    int CurrentDisposition = actor1.GetRelationshipRank(playerref)
+    if CurrentDisposition < 0
+        CurrentDisposition = 0
+    endif
+    actor1.SetFactionRank(IOSS_DispositionBeforeUpset, CurrentDisposition)
     if UpsetLevel >= 0 && UpsetLevel <= 4
         actor1.SetFactionRank(OCR_Lover_State_Upset, UpsetLevel)
     else
         Debug.Notification("MakeUpset: Passed UpsetLevel " + UpsetLevel + " is not valid.")
     endif
+    ;Finally, lower the disposition
+    actor1.SetRelationshipRank(playerref, -1)
+    MiscUtil.PrintConsole("MakeUpset: lowered NPC's disposition toward PC. Previous value was " + CurrentDisposition)
 endFunction
+
+function RestoreDisposition(actor actor1)
+    int PreviousDisposition = actor1.GetFactionRank(IOSS_DispositionBeforeUpset)
+    actor1.SetRelationshipRank(playerref, PreviousDisposition)
+    actor1.RemoveFromFaction(IOSS_DispositionBeforeUpset)
+    MiscUtil.PrintConsole("RestoreDisposition: restored NPC's disposition value of " + PreviousDisposition)
+endfunction
 
 function Rel_InteractionCooldown2h(actor actor1)
     IOSS_InteractionCooldownSpell2h.Cast(playerref, actor1)
