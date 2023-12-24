@@ -51,9 +51,6 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
 	;Apply effects for involved characters
 	Cheating_BreakUp(DetectedCheatingAlias.GetActorReference())
 	Cheating_InvolvedReaction(SceneInteractionSubject.GetActorReference())
-	;Reset
-	DetectedCheatingAlias.Clear()
-	IOSS_CheatingDetection.Stop()
 EndEvent
 
 function Cheating_BreakUp(actor actor1)
