@@ -8,6 +8,7 @@ Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 (GetOwningQuest() as OCR_AttractionUtil).GetAttraction(akspeaker)
 (GetOwningQuest() as OCR_CommitmentUtil).GetCommitment(akspeaker)
+(GetOwningQuest() as IOSS_Relationship).Make3PPCandidates()
 (GetOwningQuest() as IOSS_SceneInteractions).OfCourseCooldown(akspeaker)
 ;END CODE
 EndFunction

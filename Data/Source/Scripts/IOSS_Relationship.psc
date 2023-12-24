@@ -53,6 +53,7 @@ Message Property IOSS_Relationship_Reconcile_Success  Auto
 Message Property IOSS_Tooltip_EndAnimation  Auto
 Message Property IOSS_Tooltip_GoSteadyFail  Auto
 OCR_OStimSequencesUtil Property Util Auto
+Quest Property IOSS_Make3PPCandidatesQST Auto
 ReferenceAlias Property SceneNPC  Auto
 SPELL Property IOSS_InteractionCooldownSpell12h  Auto
 SPELL Property IOSS_InteractionCooldownSpell24h  Auto
@@ -357,3 +358,7 @@ endFunction
 function Rel_InteractionCooldown24h(actor actor1)
     IOSS_InteractionCooldownSpell24h.Cast(playerref, actor1)
 endFunction
+
+function Make3PPCandidates()
+    IOSS_Make3PPCandidatesQST.Start()
+endfunction
