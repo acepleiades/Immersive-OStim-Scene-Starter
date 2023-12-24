@@ -221,6 +221,60 @@ function Relationship_Apologize(actor actor1)
     endif
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
+function Relationship_PersuadeNonExcl(actor actor1)
+    if actor1.IsInFaction(OCR_Lover_AcceptsMultiplePartnersFaction) ;Automatically applied to commitment 0
+        IOSS_Relationship_PersuadeNonExcl_Yes.Show()
+    else
+        int actor1Commitment = actor1.GetFactionRank(OCR_Lover_Commitment)
+        float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
+        float actor1Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
+        if actor1Commitment == 1
+            if OCR_CurrentAttraction.GetValue() >= 1.5 && actor1Intimacy >= 50
+                int iChoice = IOSS_Relationship_PersuadeNonExcl_Maybe.Show()
+                if iChoice == 0
+                    IOSS_Relationship_PersuadedNE_Intimacy.Show()
+                    actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+                endif
+            elseif OCR_CurrentAttraction.GetValue() >= 1.5 && actor1Love >= 75
+                int iChoice = IOSS_Relationship_PersuadeNonExcl_Maybe.Show()
+                if iChoice == 0
+                    IOSS_Relationship_PersuadedNE_Love.Show()
+                    actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+                endif
+            elseif OCR_CurrentAttraction.GetValue() >= 2
+                int iChoice = IOSS_Relationship_PersuadeNonExcl_Maybe.Show()
+                if iChoice == 0
+                    IOSS_Relationship_PersuadedNE_Attraction.Show()
+                    actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+                endif
+            else
+                IOSS_Relationship_PersuadeNonExcl_No1.Show()
+            endif
+        else ;Commitment 2
+            if OCR_CurrentAttraction.GetValue() >= 1.75 && actor1Intimacy >= 75
+                int iChoice = IOSS_Relationship_PersuadeNonExcl_Maybe.Show()
+                if iChoice == 0
+                    IOSS_Relationship_PersuadedNE_Intimacy.Show()
+                    actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+                endif
+            elseif OCR_CurrentAttraction.GetValue() >= 1.75 && actor1Love >= 100
+                int iChoice = IOSS_Relationship_PersuadeNonExcl_Maybe.Show()
+                if iChoice == 0
+                    IOSS_Relationship_PersuadedNE_Love.Show()
+                    actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+                endif
+            elseif OCR_CurrentAttraction.GetValue() >= 2.5
+                int iChoice = IOSS_Relationship_PersuadeNonExcl_Maybe.Show()
+                if iChoice == 0
+                    IOSS_Relationship_PersuadedNE_Attraction.Show()
+                    actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+                endif
+            else
+                IOSS_Relationship_PersuadeNonExcl_No2.Show()
+            endif
+        endif
+    endif
+endfunction
 
 Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     Utility.Wait(0.5)

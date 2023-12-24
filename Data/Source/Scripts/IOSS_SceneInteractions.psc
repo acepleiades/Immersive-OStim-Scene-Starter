@@ -11,6 +11,7 @@ GlobalVariable Property IOSS_ShownTooltip_CaressFail  Auto
 GlobalVariable Property IOSS_ShownTooltip_ChatterFail  Auto
 GlobalVariable Property IOSS_ShownTooltip_CourtFail  Auto
 GlobalVariable Property OCR_CurrentAttraction  Auto
+GlobalVariable Property IOSS_CheatingDetectionType  Auto
 Message Property IOSS_SceneMSG_Caress_Fail1  Auto
 Message Property IOSS_SceneMSG_Chatter_Fail1  Auto
 Message Property IOSS_SceneMSG_Chatter_Success1  Auto
@@ -69,6 +70,7 @@ endFunction
 function SceneCourt(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetectionType.SetValue(0)
     IOSS_CheatingDetection.Start()
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Automatic failure if attraction is too low
@@ -104,6 +106,7 @@ endFunction
 function SceneCaress(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetectionType.SetValue(0)
     IOSS_CheatingDetection.Start()
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, caressing may require a minimum Intimacy value
@@ -114,9 +117,9 @@ function SceneCaress(actor actor1)
     bool WillingToBeCaressed
     if actor1.GetAV("Morality") <= 1
         WillingToBeCaressed = true
-    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy >= 5)
+    elseIf (actor1.GetAV("Morality") == 2 && actor1Intimacy > 0)
         WillingToBeCaressed = true
-    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 10)
+    elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 5)
         WillingToBeCaressed = true
     else
         MiscUtil.PrintConsole("SceneCaress: NPC is not willing to be caressed due to low Intimacy.")
@@ -167,6 +170,7 @@ endFunction
 function SceneKiss(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetectionType.SetValue(0)
     IOSS_CheatingDetection.Start()
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, kissing may require a minimum Intimacy value
