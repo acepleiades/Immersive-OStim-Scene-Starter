@@ -19,7 +19,7 @@ Quest __temp = self as Quest
 IOSS_Cheating kmyQuest = __temp as IOSS_Cheating
 ;END AUTOCAST
 ;BEGIN CODE
-Debug.Notification("IOSS_CheatingDetection started")
+;Debug.Notification("IOSS_CheatingDetection started")
 (kmyQuest as IOSS_Cheating).DetectCheating()
 ;END CODE
 EndFunction
