@@ -7,6 +7,7 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 (GetOwningQuest() as IOSS_SceneInteractions).SceneCaress(akspeaker)
+(GetOwningQuest() as IOSS_Cheating).DetectCheating(akspeaker, 1)
 ;END CODE
 EndFunction
 ;END FRAGMENT

@@ -6,7 +6,7 @@ Scriptname IOSS_TIF__0613E74F Extends TopicInfo Hidden
 Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
-(GetOwningQuest() as OCR_OStimScenesUtil).OCR_StartScene(akspeaker)
+(GetOwningQuest() as IOSS_AdultScene).StartAdultScene(akspeaker)
 ;END CODE
 EndFunction
 ;END FRAGMENT
