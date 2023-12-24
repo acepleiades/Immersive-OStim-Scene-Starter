@@ -414,5 +414,6 @@ function Rel_InteractionCooldown24h(actor actor1)
 endFunction
 
 function Make3PPCandidates()
+    IOSS_Make3PPCandidatesQST.Stop()
     IOSS_Make3PPCandidatesQST.Start()
 endfunction
