@@ -6,12 +6,16 @@ Faction Property OCR_Lover_Commitment  Auto
 Faction Property OCR_Lover_PlayerCommittedRelationshipFaction  Auto
 Faction Property OCR_Lover_Value_Intimacy  Auto
 Faction Property OCR_Lover_Value_Love  Auto
-GlobalVariable Property GameHour  auto
+GlobalVariable Property IOSS_CheatingDetectionType  Auto
 GlobalVariable Property IOSS_ShownTooltip_CaressFail  Auto
 GlobalVariable Property IOSS_ShownTooltip_ChatterFail  Auto
 GlobalVariable Property IOSS_ShownTooltip_CourtFail  Auto
 GlobalVariable Property OCR_CurrentAttraction  Auto
-GlobalVariable Property IOSS_CheatingDetectionType  Auto
+GlobalVariable property GameDay auto
+GlobalVariable property GameDaysPassed auto
+GlobalVariable property GameHour auto
+GlobalVariable property GameMonth auto
+GlobalVariable property GameYear auto
 Message Property IOSS_SceneMSG_Caress_Fail1  Auto
 Message Property IOSS_SceneMSG_Chatter_Fail1  Auto
 Message Property IOSS_SceneMSG_Chatter_Success1  Auto
@@ -234,9 +238,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         actor actor1 = SceneNPC.GetActorReference()
         IntimacyGainNotification(actor1)
         ;Skip time based on result
-        float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 1.5
-        GameHour.SetValue(newHour)
+        OCR_GlobalFunctions.AdvanceTimeByHours(1.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 200.0)
         ;Result messages
@@ -245,9 +247,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         RevealAttraction(actor1)
     elseif (AnimationPlayed == 2) ;Chatter Fail
         ;Skip time based on result
-        float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 0.5
-        GameHour.SetValue(newHour)
+        OCR_GlobalFunctions.AdvanceTimeByHours(0.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1000.0)
         ;Interactions cooldown of two in-game hours
@@ -274,18 +274,14 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
                 endif
             endif
         ;Skip time based on result
-        float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 1.5
-        GameHour.SetValue(newHour)
+        OCR_GlobalFunctions.AdvanceTimeByHours(1.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 300.0)
         ;Result message
         IOSS_SceneMSG_Court_Success1.Show()
     elseif (AnimationPlayed == 4) ;Court Fail
         ;Skip time based on result
-        float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 0.5
-        GameHour.SetValue(newHour)
+        OCR_GlobalFunctions.AdvanceTimeByHours(0.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 1500.0)
         ;Interactions cooldown of two in-game hours
@@ -314,9 +310,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             endif
         endif
         ;Skip time based on result
-        float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 0.5
-        GameHour.SetValue(newHour)
+        OCR_GlobalFunctions.AdvanceTimeByHours(0.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
     elseif (AnimationPlayed == 6) ;Caress Fail
         ;Interactions cooldown of two in-game hours
         InteractionCooldown2h(SceneNPC.GetActorReference())
@@ -344,9 +338,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
                 endif
             endif
         ;Skip time based on result
-        float currentHour = GameHour.GetValue()
-        float newHour = currentHour + 0.5
-        GameHour.SetValue(newHour)
+        OCR_GlobalFunctions.AdvanceTimeByHours(0.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
     elseif (AnimationPlayed == 8) ;Kiss Fail
         ;Interactions cooldown that goes down with higher Intimacy
         actor actor1 = SceneNPC.GetActorReference()
