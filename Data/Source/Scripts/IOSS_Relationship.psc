@@ -106,15 +106,15 @@ function Relationship_GoSteady(actor actor1)
 		Util.Court(actor1)
 		Query = 4
 	ElseIf OCR_CurrentAttraction.GetValue() > 1.15 && actor1Intimacy > 10 && actor1Love > 0
-        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.5 and > 1.15, requirement was 10 Intimacy and 5 Love.")
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.5 and > 1.15, requirement was 10 Intimacy and positive Love.")
 		Util.Court(actor1)
 		Query = 4
 	elseif OCR_CurrentAttraction.GetValue() > 1 && actor1Intimacy > 15 && actor1Love > 5
-        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.15 and > 1, requirement was 15 Intimacy and 10 Love.")
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.15 and > 1, requirement was 15 Intimacy and 5 Love.")
 		Util.Court(actor1)
 		Query = 4
 	elseif OCR_CurrentAttraction.GetValue() > 0.85 && actor1Intimacy > 20 && actor1Love > 10
-        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1 and > 0.85, requirement was 20 Intimacy and 15 Love.")
+        MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1 and > 0.85, requirement was 20 Intimacy and 10 Love.")
 		Util.Court(actor1)
 		Query = 4
 	else
