@@ -41,6 +41,7 @@ Int property AnimationPlayed Auto
 function SceneChatter(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetection.Stop()
     actor1.AddToFaction(OCR_Lover_Value_Intimacy)
     ;Calculate the success rate for this interaction
     float Bonus_AttractionSpeech = (OCR_CurrentAttraction.GetValue() + 1) * ((playerref.GetAV("Speechcraft")))

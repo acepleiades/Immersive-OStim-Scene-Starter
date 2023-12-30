@@ -19,6 +19,7 @@ Faction Property OCR_SocialClass_SoldierOrGuard Auto
 Faction Property OCR_Trait_EnthusiastArcane  Auto
 Faction Property OCR_Trait_EnthusiastEscapade  Auto
 Faction Property OCR_Trait_EnthusiastMartial  Auto
+GlobalVariable Property IOSS_CheatingDetectionType  Auto
 GlobalVariable Property IOSS_ShownTooltip_EndAnimation  Auto
 GlobalVariable Property IOSS_ShownTooltip_GoSteadyFail  Auto
 GlobalVariable Property OCR_CurrentAttraction  Auto
@@ -53,6 +54,7 @@ Message Property IOSS_Relationship_Reconcile_Success  Auto
 Message Property IOSS_Tooltip_EndAnimation  Auto
 Message Property IOSS_Tooltip_GoSteadyFail  Auto
 OCR_OStimSequencesUtil Property Util Auto
+Quest Property IOSS_CheatingDetection Auto
 Quest Property IOSS_Make3PPCandidatesQST Auto
 ReferenceAlias Property SceneNPC  Auto
 SPELL Property IOSS_InteractionCooldownSpell12h  Auto
@@ -75,7 +77,7 @@ endfunction
 function Inquire_Interests(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
-	TooltipEndAnimation()
+    TooltipEndAnimation()
     Util.StandingConversation(actor1)
     Query = 1
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -83,7 +85,7 @@ endfunction
 function Inquire_SocialClass(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
-	TooltipEndAnimation()
+    TooltipEndAnimation()
     Util.StandingConversation(actor1)
     Query = 2
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -91,7 +93,7 @@ endfunction
 function Inquire_Commitment(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
-	TooltipEndAnimation()
+    TooltipEndAnimation()
     Util.StandingConversation(actor1)
     Query = 3
     RegisterForModEvent("ostim_end", "OStimEnd")
@@ -99,64 +101,70 @@ endfunction
 function Relationship_GoSteady(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetectionType.SetValue(0)
+    IOSS_CheatingDetection.Stop()
+    IOSS_CheatingDetection.Start()
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
     float actor1Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
-	if OCR_CurrentAttraction.GetValue() > 1.5 && actor1Intimacy > 5 && actor1Love > 0
+    if OCR_CurrentAttraction.GetValue() > 1.5 && actor1Intimacy > 5 && actor1Love > 0
         MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is higher than 1.5, requirement was 5 Intimacy and positive Love.")
-		Util.Court(actor1)
-		Query = 4
-	ElseIf OCR_CurrentAttraction.GetValue() > 1.15 && actor1Intimacy > 10 && actor1Love > 0
+        Util.Court(actor1)
+        Query = 4
+    ElseIf OCR_CurrentAttraction.GetValue() > 1.15 && actor1Intimacy > 10 && actor1Love > 0
         MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.5 and > 1.15, requirement was 10 Intimacy and positive Love.")
-		Util.Court(actor1)
-		Query = 4
-	elseif OCR_CurrentAttraction.GetValue() > 1 && actor1Intimacy > 15 && actor1Love > 5
+        Util.Court(actor1)
+        Query = 4
+    elseif OCR_CurrentAttraction.GetValue() > 1 && actor1Intimacy > 15 && actor1Love > 5
         MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1.15 and > 1, requirement was 15 Intimacy and 5 Love.")
-		Util.Court(actor1)
-		Query = 4
-	elseif OCR_CurrentAttraction.GetValue() > 0.85 && actor1Intimacy > 20 && actor1Love > 10
+        Util.Court(actor1)
+        Query = 4
+    elseif OCR_CurrentAttraction.GetValue() > 0.85 && actor1Intimacy > 20 && actor1Love > 10
         MiscUtil.PrintConsole("Relationship_GoSteady: Attraction is < 1 and > 0.85, requirement was 20 Intimacy and 10 Love.")
-		Util.Court(actor1)
-		Query = 4
-	else
+        Util.Court(actor1)
+        Query = 4
+    else
         MiscUtil.PrintConsole("Relationship_GoSteady: Did not match the required Attraction, Intimacy and/or Love.")
-		Util.CourtFail(actor1)
-		Query = 5
-	endif
+        Util.CourtFail(actor1)
+        Query = 5
+    endif
     RegisterForModEvent("ostim_end", "OStimEnd")
 endfunction
 function Relationship_BreakUp(actor actor1)
     float actor1Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
     if actor1Intimacy > 50
         ;Apply interactions cooldown
-    	Rel_InteractionCooldown24h(actor1)
+        Rel_InteractionCooldown24h(actor1)
         MiscUtil.PrintConsole("Relationship_BreakUp: NPC is not upset because Intimacy is > 50.")
         ;Update factions
-    	actor1.SetFactionRank(OCR_Lover_Value_Love, 0)
-    	actor1.RemoveFromFaction(OCR_Lover_Value_Love)
-    	actor1.RemoveFromFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
-    	actor1.AddToFaction(OCR_Lover_PlayerBrokeUpFaction)
+        actor1.SetFactionRank(OCR_Lover_Value_Love, 0)
+        actor1.RemoveFromFaction(OCR_Lover_Value_Love)
+        actor1.RemoveFromFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
+        actor1.AddToFaction(OCR_Lover_PlayerBrokeUpFaction)
         ;Message and notification
-    	IOSS_Relationship_BreakUp_NotUpset.Show()
+        IOSS_Relationship_BreakUp_NotUpset.Show()
         Debug.Notification("Your partner is no longer committed to you.")
     else
         MiscUtil.PrintConsole("Relationship_BreakUp: NPC is upset because Intimacy is < 50.")
         ;Make NPC upset and apply interactions cooldown
-    	Rel_InteractionCooldown24h(actor1)
+        Rel_InteractionCooldown24h(actor1)
         MakeUpset(actor1, 2)
         ;Update factions
-    	actor1.SetFactionRank(OCR_Lover_Value_Love, 0)
-    	actor1.RemoveFromFaction(OCR_Lover_Value_Love)
-    	actor1.RemoveFromFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
-    	actor1.AddToFaction(OCR_Lover_PlayerBrokeUpFaction)
+        actor1.SetFactionRank(OCR_Lover_Value_Love, 0)
+        actor1.RemoveFromFaction(OCR_Lover_Value_Love)
+        actor1.RemoveFromFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
+        actor1.AddToFaction(OCR_Lover_PlayerBrokeUpFaction)
         ;Message and notifications
-    	IOSS_Relationship_BreakUp_Upset.Show()
+        IOSS_Relationship_BreakUp_Upset.Show()
         Debug.Notification("Your partner is no longer committed to you.")
-    	Debug.Notification("Your partner is upset.")
+        Debug.Notification("Your partner is upset.")
     endif
 endfunction
 function Relationship_Reconcile(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetectionType.SetValue(0)
+    IOSS_CheatingDetection.Stop()
+    IOSS_CheatingDetection.Start()
     ; Calculate the success rate for reconciliation
     float Penalty_Commitment = actor1.GetFactionRank(OCR_Lover_Commitment) * -20
     float Bonus_Attraction = OCR_CurrentAttraction.GetValue() * 15
@@ -174,7 +182,7 @@ function Relationship_Reconcile(actor actor1)
     MiscUtil.PrintConsole("Relationship_Reconcile: 'Dice roll' is " + RandomChance)
     MiscUtil.PrintConsole("Relationship_Reconcile: See that the 'dice roll' must be lower than the success rate to succeed.")
     ; Minimum 5% chance
-    if SuccessChance < 0
+    if SuccessChance < 5
         SuccessChance = 5
         MiscUtil.PrintConsole("Relationship_Reconcile: Applied minimum success chance of 5%.")
     endif
@@ -191,18 +199,19 @@ endFunction
 function Relationship_Apologize(actor actor1)
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    IOSS_CheatingDetection.Stop()
     ; Calculate the success rate for apology
     float Penalty_UpsetLevel = actor1.GetFactionRank(OCR_Lover_State_Upset) * 15
     float Penalty_Cheating = 0
     ; Check for cheating penalty
     if actor1.IsInFaction(OCR_Lover_PlayerCheatedFaction) && actor1.GetFactionRank(OCR_Lover_Commitment) > 0
         Penalty_Cheating = actor1.GetFactionRank(OCR_Lover_PlayerCheatedFaction) * 30
-    	MiscUtil.PrintConsole("Relationship_Apologize: Player has cheated.")
+        MiscUtil.PrintConsole("Relationship_Apologize: Player has cheated.")
     endif
     float Bonus_Speechcraft = playerref.GetAV("Speechcraft") / 4
     float SuccessChance = 100 - Penalty_UpsetLevel - Penalty_Cheating + Bonus_Speechcraft
     ; Minimum 5% chance
-    if SuccessChance < 0
+    if SuccessChance < 5
         SuccessChance = 5
         MiscUtil.PrintConsole("Relationship_Reconcile: Applied minimum success chance of 5%.")
     endif
@@ -282,97 +291,97 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     Utility.Wait(0.5)
     ;Display the message after the scene
     if (Query == 1) ;Inquire_Interests
-    	actor actor1 = SceneNPC.GetActorReference()
-    	if actor1.IsInFaction(OCR_Trait_EnthusiastArcane)
-    		IOSS_Inquire_Interest_Arcane.Show()
-    	ElseIf actor1.IsInFaction(OCR_Trait_EnthusiastEscapade)
-    		IOSS_Inquire_Interest_Escapade.Show()
-    	ElseIf actor1.IsInFaction(OCR_Trait_EnthusiastMartial)
-    		IOSS_Inquire_Interest_Martial.Show()
-    	Else
-    		Debug.Notification("There was nothing to talk about.")
-    	endif
+        actor actor1 = SceneNPC.GetActorReference()
+        if actor1.IsInFaction(OCR_Trait_EnthusiastArcane)
+            IOSS_Inquire_Interest_Arcane.Show()
+        ElseIf actor1.IsInFaction(OCR_Trait_EnthusiastEscapade)
+            IOSS_Inquire_Interest_Escapade.Show()
+        ElseIf actor1.IsInFaction(OCR_Trait_EnthusiastMartial)
+            IOSS_Inquire_Interest_Martial.Show()
+        Else
+            Debug.Notification("There was nothing to talk about.")
+        endif
     elseif (Query == 2) ;Inquire_SocialClass
-    	actor actor1 = SceneNPC.GetActorReference()
-    	if actor1.IsInFaction(OCR_SocialClass_CitizenLow)
-    		IOSS_Inquire_SocialClass_CitizenLow.Show()
-    	ElseIf actor1.IsInFaction(OCR_SocialClass_CitizenLowest)
-    		IOSS_Inquire_SocialClass_CitizenLowest.Show()
-    	ElseIf actor1.IsInFaction(OCR_SocialClass_CitizenMiddle)
-    		IOSS_Inquire_SocialClass_CitizenMiddle.Show()
-    	ElseIf actor1.IsInFaction(OCR_SocialClass_CitizenNoble)
-    		IOSS_Inquire_SocialClass_CitizenNoble.Show()
-    	ElseIf actor1.IsInFaction(OCR_SocialClass_SoldierOrGuard)
-    		IOSS_Inquire_SocialClass_SoldierOrGuard.Show()
-    	ElseIf actor1.IsInFaction(OCR_SocialClass_Other)
-    		IOSS_Inquire_SocialClass_Other.Show()
-    	Else
-    		Debug.Notification("There was nothing to talk about.")
-    	endif
+        actor actor1 = SceneNPC.GetActorReference()
+        if actor1.IsInFaction(OCR_SocialClass_CitizenLow)
+            IOSS_Inquire_SocialClass_CitizenLow.Show()
+        ElseIf actor1.IsInFaction(OCR_SocialClass_CitizenLowest)
+            IOSS_Inquire_SocialClass_CitizenLowest.Show()
+        ElseIf actor1.IsInFaction(OCR_SocialClass_CitizenMiddle)
+            IOSS_Inquire_SocialClass_CitizenMiddle.Show()
+        ElseIf actor1.IsInFaction(OCR_SocialClass_CitizenNoble)
+            IOSS_Inquire_SocialClass_CitizenNoble.Show()
+        ElseIf actor1.IsInFaction(OCR_SocialClass_SoldierOrGuard)
+            IOSS_Inquire_SocialClass_SoldierOrGuard.Show()
+        ElseIf actor1.IsInFaction(OCR_SocialClass_Other)
+            IOSS_Inquire_SocialClass_Other.Show()
+        Else
+            Debug.Notification("There was nothing to talk about.")
+        endif
     elseif (Query == 3) ;Inquire_Interests
-    	actor actor1 = SceneNPC.GetActorReference()
-    	int actor1Commitment = actor1.GetFactionRank(OCR_Lover_Commitment)
-    	if actor1Commitment == 0
-    		IOSS_Inquire_Commitment_0.Show()
-    	ElseIf actor1Commitment == 1
-    		IOSS_Inquire_Commitment_1.Show()
-    	ElseIf actor1Commitment == 2
-    		IOSS_Inquire_Commitment_2.Show()
-    	Else
-    		Debug.Notification("There was nothing to talk about.")
-    	endif
+        actor actor1 = SceneNPC.GetActorReference()
+        int actor1Commitment = actor1.GetFactionRank(OCR_Lover_Commitment)
+        if actor1Commitment == 0
+            IOSS_Inquire_Commitment_0.Show()
+        ElseIf actor1Commitment == 1
+            IOSS_Inquire_Commitment_1.Show()
+        ElseIf actor1Commitment == 2
+            IOSS_Inquire_Commitment_2.Show()
+        Else
+            Debug.Notification("There was nothing to talk about.")
+        endif
     elseif (Query == 4) ;Relationship_GoSteady Success
-    	actor actor1 = SceneNPC.GetActorReference()
-    	int actor1Commitment = actor1.GetFactionRank(OCR_Lover_Commitment)
-    	if actor1Commitment == 0
-    		IOSS_Relationship_GoSteady_Yes_PCNonExclusive.Show()
-    		actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
-    		actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
-    	ElseIf actor1Commitment >= 1
-    		IOSS_Relationship_GoSteady_Yes_PCExclusive.Show()
-    		actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
-    	endif
-    	Debug.Notification("Your partner has committed to you.")
+        actor actor1 = SceneNPC.GetActorReference()
+        int actor1Commitment = actor1.GetFactionRank(OCR_Lover_Commitment)
+        if actor1Commitment == 0
+            IOSS_Relationship_GoSteady_Yes_PCNonExclusive.Show()
+            actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
+            actor1.AddToFaction(OCR_Lover_AcceptsMultiplePartnersFaction)
+        ElseIf actor1Commitment >= 1
+            IOSS_Relationship_GoSteady_Yes_PCExclusive.Show()
+            actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
+        endif
+        Debug.Notification("Your partner has committed to you.")
     elseif (Query == 5) ;Relationship_GoSteady Fail
-    	IOSS_Relationship_GoSteady_No.Show()
-    	if (IOSS_ShownTooltip_GoSteadyFail.GetValue()) == 0
-        	IOSS_Tooltip_GoSteadyFail.Show()
-        	IOSS_ShownTooltip_GoSteadyFail.SetValue(1)
-    	endif
+        IOSS_Relationship_GoSteady_No.Show()
+        if (IOSS_ShownTooltip_GoSteadyFail.GetValue()) == 0
+            IOSS_Tooltip_GoSteadyFail.Show()
+            IOSS_ShownTooltip_GoSteadyFail.SetValue(1)
+        endif
     elseif (Query == 6) ;Reconciliation Success
-    	actor actor1 = SceneNPC.GetActorReference()
+        actor actor1 = SceneNPC.GetActorReference()
         actor1.SetFactionRank(OCR_Lover_Value_Love, 1)
-    	actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
-    	actor1.RemoveFromFaction(OCR_Lover_PlayerBrokeUpFaction)
-    	IOSS_Relationship_Reconcile_Success.Show()
-    	Debug.Notification("Your partner has committed to you (again).")
+        actor1.AddToFaction(OCR_Lover_PlayerCommittedRelationshipFaction)
+        actor1.RemoveFromFaction(OCR_Lover_PlayerBrokeUpFaction)
+        IOSS_Relationship_Reconcile_Success.Show()
+        Debug.Notification("Your partner has committed to you (again).")
     elseif (Query == 7) ;Reconciliation Fail
-    	actor actor1 = SceneNPC.GetActorReference()
-    	Rel_InteractionCooldown24h(actor1)
-    	IOSS_Relationship_Reconcile_Fail.Show()
+        actor actor1 = SceneNPC.GetActorReference()
+        Rel_InteractionCooldown24h(actor1)
+        IOSS_Relationship_Reconcile_Fail.Show()
     elseif (Query == 8) ;Apology Success
-    	actor actor1 = SceneNPC.GetActorReference()
-    	actor1.RemoveFromFaction(OCR_Lover_PlayerCheatedFaction)
-    	actor1.RemoveFromFaction(OCR_Lover_State_Upset)
+        actor actor1 = SceneNPC.GetActorReference()
+        actor1.RemoveFromFaction(OCR_Lover_PlayerCheatedFaction)
+        actor1.RemoveFromFaction(OCR_Lover_State_Upset)
         RestoreDisposition(actor1)
-    	IOSS_Relationship_Apologize_Success.Show()
-    	Debug.Notification("Your partner is no longer upset.")
+        IOSS_Relationship_Apologize_Success.Show()
+        Debug.Notification("Your partner is no longer upset.")
     elseif (Query == 9) ;Apology Fail
-    	actor actor1 = SceneNPC.GetActorReference()
-    	if actor1.GetFactionRank(OCR_Lover_State_Upset) == 4
-    		Rel_InteractionCooldown24h(actor1)
+        actor actor1 = SceneNPC.GetActorReference()
+        if actor1.GetFactionRank(OCR_Lover_State_Upset) == 4
+            Rel_InteractionCooldown24h(actor1)
             MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 4, applying 24-hours interactions cooldown.")
-    	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 3
-    		Rel_InteractionCooldown12h(actor1)
+        elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 3
+            Rel_InteractionCooldown12h(actor1)
             MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 3, applying 12-hours interactions cooldown.")
-    	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 2
-    		Rel_InteractionCooldown6h(actor1)
+        elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 2
+            Rel_InteractionCooldown6h(actor1)
             MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 2, applying 6-hours interactions cooldown.")
-    	elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 1
-    		Rel_InteractionCooldown2h(actor1)
+        elseif actor1.GetFactionRank(OCR_Lover_State_Upset) == 1
+            Rel_InteractionCooldown2h(actor1)
             MiscUtil.PrintConsole("Relationship_Apologize: UpsetLevel is 1, applying 2-hours interactions cooldown.")
-    	endif
-    	IOSS_Relationship_Apologize_Fail.Show()
+        endif
+        IOSS_Relationship_Apologize_Fail.Show()
     endif
     ;Reset
     Query = 0
