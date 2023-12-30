@@ -189,6 +189,8 @@ function Relationship_Reconcile(actor actor1)
     RegisterForModEvent("ostim_end", "OStimEnd")
 endFunction
 function Relationship_Apologize(actor actor1)
+    SceneNPC.Clear()
+    SceneNPC.ForceRefTo(actor1)
     ; Calculate the success rate for apology
     float Penalty_UpsetLevel = actor1.GetFactionRank(OCR_Lover_State_Upset) * 15
     float Penalty_Cheating = 0
