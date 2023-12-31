@@ -362,6 +362,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     endif
     ;Reset
     AnimationPlayed = 0
+    UnregisterForModEvent("ostim_end")
 EndEvent
 
 function RevealAttraction(actor actor1)

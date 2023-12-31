@@ -51,7 +51,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     ;Apply effects for involved characters
     Cheating_BreakUp(DetectedCheatingAlias.GetActorReference())
     Cheating_InvolvedReaction(SceneInteractionSubject.GetActorReference())
-    IOSS_CheatingDetection.Stop()
+    UnregisterForModEvent("ostim_end")
 EndEvent
 
 ;For starting unrestricted OStim scenes nearby exclusive-relationship lovers
@@ -82,7 +82,7 @@ Event OStimStart(string eventName, string strArg, float numArg, Form sender)
     ;Apply effects for involved characters
     Cheating_BreakUp(DetectedCheatingAlias.GetActorReference())
     Cheating_InvolvedReaction(SceneInteractionSubject.GetActorReference())
-    IOSS_CheatingDetection.Stop()
+    UnregisterForModEvent("ostim_start")
 EndEvent
 
 function Cheating_BreakUp(actor actor1)

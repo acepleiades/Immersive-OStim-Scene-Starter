@@ -385,6 +385,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
     endif
     ;Reset
     Query = 0
+    UnregisterForModEvent("ostim_end")
 EndEvent
 
 function MakeUpset(actor actor1, int UpsetLevel)
