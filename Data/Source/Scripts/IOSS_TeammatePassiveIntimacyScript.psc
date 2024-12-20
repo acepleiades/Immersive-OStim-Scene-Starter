@@ -1,6 +1,7 @@
 Scriptname IOSS_TeammatePassiveIntimacyScript extends Quest  
 
 Actor Property playerref Auto
+Faction Property IOSS_IsOrWasFollower  Auto
 Faction Property OCR_Lover_Value_Intimacy  Auto
 GlobalVariable Property GameDaysPassed  Auto
 GlobalVariable Property IOSS_TeammateIntimacy_SetCooldown  Auto
@@ -10,6 +11,11 @@ SPELL Property IOSS_TeammateIntimacyCooldownSpell  Auto
 
 Function IncreaseTeammateIntimacy(actor actor1)
     ;(GetOwningQuest() as IOSS_TeammatePassiveIntimacyScript).IncreaseTeammateIntimacy(akspeaker)
+    ;Add to IsOrWasFollower faction
+    if actor1.IsInFaction(IOSS_IsOrWasFollower)
+        actor1.AddToFaction(IOSS_IsOrWasFollower)
+        MiscUtil.PrintConsole("IncreaseTeammateIntimacy: NPC added to IsOrWasFollower faction.")
+    endif
     ;Clear and fill alias
     TeammateAlias.Clear()
     TeammateAlias.ForceRefTo(actor1)
@@ -24,7 +30,7 @@ Function IncreaseTeammateIntimacy(actor actor1)
     if Intimacy < 100
         int newIntimacy = Intimacy + 2
         actor1.SetFactionRank(OCR_Lover_Value_Intimacy, newIntimacy)
-        MiscUtil.PrintConsole(actor1 + "'s Intimacy value was " + Intimacy + " and is now " + newIntimacy)
+        MiscUtil.PrintConsole("IncreaseTeammateIntimacy: " + actor1 + "'s Intimacy value was " + Intimacy + " and is now " + newIntimacy)
         IOSS_TeammateIntimacyMessage.Show()
     endif
     ;Ensure maximum intimacy is 100

@@ -1,11 +1,13 @@
 Scriptname IOSS_SceneInteractions extends Quest  
 
 Actor Property PlayerRef Auto
+Faction Property IOSS_IsOrWasFollower  Auto
 Faction Property IOSS_Revealed_Attracted  Auto
 Faction Property OCR_Lover_Commitment  Auto
 Faction Property OCR_Lover_PlayerCommittedRelationshipFaction  Auto
 Faction Property OCR_Lover_Value_Intimacy  Auto
 Faction Property OCR_Lover_Value_Love  Auto
+GlobalVariable Property IOSS_FirstPartnerBonusApplied  Auto
 GlobalVariable Property IOSS_CheatingDetectionType  Auto
 GlobalVariable Property IOSS_ShownTooltip_CaressFail  Auto
 GlobalVariable Property IOSS_ShownTooltip_ChatterFail  Auto
@@ -16,6 +18,7 @@ GlobalVariable property GameDaysPassed auto
 GlobalVariable property GameHour auto
 GlobalVariable property GameMonth auto
 GlobalVariable property GameYear auto
+Keyword Property IOSS_FirstPartner Auto
 Message Property IOSS_SceneMSG_Caress_Fail1  Auto
 Message Property IOSS_SceneMSG_Chatter_Fail1  Auto
 Message Property IOSS_SceneMSG_Chatter_Success1  Auto
@@ -28,29 +31,44 @@ Message Property IOSS_Tooltip_ChatterFail  Auto
 Message Property IOSS_Tooltip_CourtFail  Auto
 OCR_OStimSequencesUtil Property Util Auto
 Quest Property IOSS_CheatingDetection  Auto
+ReferenceAlias Property FirstPartner  Auto
 ReferenceAlias Property SceneNPC  Auto
+SPELL Property IOSS_ChatterCooldownSpell  Auto
 SPELL Property IOSS_InteractionCooldownSpell12h  Auto
 SPELL Property IOSS_InteractionCooldownSpell24h  Auto
 SPELL Property IOSS_InteractionCooldownSpell2h  Auto
 SPELL Property IOSS_InteractionCooldownSpell6h  Auto
 SPELL Property IOSS_OfCourseCooldownSpell  Auto
 
+
+
 ; Script-wide variables
 Int property AnimationPlayed Auto
 
 function SceneChatter(actor actor1)
+    ;Manage alias
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    ;Manage cheating detection
     IOSS_CheatingDetection.Stop()
+    ;Manage bonuses
+    ApplyEaseOfUseBonuses(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Intimacy)
     ;Calculate the success rate for this interaction
-    float Bonus_AttractionSpeech = (OCR_CurrentAttraction.GetValue() + 1) * ((playerref.GetAV("Speechcraft")))
-    float Bonus_Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
-    float Bonus_RelationshipRank = (actor1.GetRelationshipRank(playerref) + 1) * 12.5
-    float SuccessChance = Bonus_AttractionSpeech + Bonus_Intimacy + Bonus_RelationshipRank
-    MiscUtil.PrintConsole("SceneChatter: Bonus_AttractionSpeech is " + Bonus_AttractionSpeech)
-    MiscUtil.PrintConsole("SceneChatter: Bonus_Intimacy is " + Bonus_Intimacy)
-    MiscUtil.PrintConsole("SceneChatter: Bonus_RelationshipRank is " + Bonus_RelationshipRank)
+    float SuccessChance
+    ;Guaranteed success for lover or the first partner
+    if actor1.GetRelationshipRank(PlayerRef) == 4 || actor1.HasKeyword(IOSS_FirstPartner)
+        SuccessChance = 100
+        MiscUtil.PrintConsole("SceneChatter: success for this interaction is guaranteed for the first partner.")
+    Else
+        float Bonus_AttractionSpeech = (OCR_CurrentAttraction.GetValue() + 1) * ((playerref.GetAV("Speechcraft")))
+        float Bonus_Intimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
+        float Bonus_RelationshipRank = (actor1.GetRelationshipRank(playerref) + 1) * 12.5
+        SuccessChance = Bonus_AttractionSpeech + Bonus_Intimacy + Bonus_RelationshipRank
+        MiscUtil.PrintConsole("SceneChatter: Bonus_AttractionSpeech is " + Bonus_AttractionSpeech)
+        MiscUtil.PrintConsole("SceneChatter: Bonus_Intimacy is " + Bonus_Intimacy)
+        MiscUtil.PrintConsole("SceneChatter: Bonus_RelationshipRank is " + Bonus_RelationshipRank)
+    endif
     MiscUtil.PrintConsole("SceneChatter: Success rate for this interaction is " + SuccessChance)
     ;Now, "roll the dice"
     float RandomChance = Utility.RandomFloat(0, 100)
@@ -60,7 +78,10 @@ function SceneChatter(actor actor1)
     ;If it was successful
         int currentIntimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy)
         if currentIntimacy < 100
-            int newIntimacy = currentIntimacy + ((actor1.GetRelationshipRank(playerref) + 1) * 2)
+            int newIntimacy = (currentIntimacy + ((actor1.GetRelationshipRank(playerref) + 1) * 2) * 3)
+            If newIntimacy > 100
+                newIntimacy = 100
+            endif
             actor1.SetFactionRank(OCR_Lover_Value_Intimacy, newIntimacy)
         endif
         Util.Chatter(actor1)
@@ -73,22 +94,33 @@ function SceneChatter(actor actor1)
 endFunction
 
 function SceneCourt(actor actor1)
+    ;Manage alias
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    ;Manage cheating detection
     IOSS_CheatingDetectionType.SetValue(0)
     IOSS_CheatingDetection.Stop()
     IOSS_CheatingDetection.Start()
+    ;Manage bonuses
+    ApplyEaseOfUseBonuses(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Automatic failure if attraction is too low
     if OCR_CurrentAttraction.GetValue() > 0.85
         ;Calculate the success rate for this interaction
-        float Bonus_Attraction = OCR_CurrentAttraction.GetValue() * 50
-        float Bonus_Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
-        float Bonus_Speechcraft = playerref.GetAV("Speechcraft") / 5
-        float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
-        MiscUtil.PrintConsole("SceneCourt: Bonus_Attraction is " + Bonus_Attraction)
-        MiscUtil.PrintConsole("SceneCourt: Bonus_Love is " + Bonus_Love)
-        MiscUtil.PrintConsole("SceneCourt: Bonus_Speechcraft is " + Bonus_Speechcraft)
+        float SuccessChance
+        ;Guaranteed success for lover or the first partner
+        if actor1.GetRelationshipRank(PlayerRef) == 4 || actor1.HasKeyword(IOSS_FirstPartner)
+            SuccessChance = 100
+            MiscUtil.PrintConsole("SceneCourt: success for this interaction is guaranteed for Lover relation or the first partner.")
+        Else
+            float Bonus_Attraction = OCR_CurrentAttraction.GetValue() * 50
+            float Bonus_Love = actor1.GetFactionRank(OCR_Lover_Value_Love)
+            float Bonus_Speechcraft = playerref.GetAV("Speechcraft") / 5
+            SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
+            MiscUtil.PrintConsole("SceneCourt: Bonus_Attraction is " + Bonus_Attraction)
+            MiscUtil.PrintConsole("SceneCourt: Bonus_Love is " + Bonus_Love)
+            MiscUtil.PrintConsole("SceneCourt: Bonus_Speechcraft is " + Bonus_Speechcraft)
+        endif
         MiscUtil.PrintConsole("SceneCourt: Success rate for this interaction is " + SuccessChance)
         ;Now, "roll the dice"
         float RandomChance = Utility.RandomFloat(0, 100)
@@ -110,11 +142,15 @@ function SceneCourt(actor actor1)
 endFunction
 
 function SceneCaress(actor actor1)
+    ;Manage alias
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    ;Manage cheating detection
     IOSS_CheatingDetectionType.SetValue(0)
     IOSS_CheatingDetection.Stop()
     IOSS_CheatingDetection.Start()
+    ;Manage bonuses
+    ApplyEaseOfUseBonuses(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, caressing may require a minimum Intimacy value
     float actor1Morality  = actor1.GetAV("Morality")
@@ -129,19 +165,30 @@ function SceneCaress(actor actor1)
     elseIf (actor1.GetAV("Morality") == 3 && actor1Intimacy >= 5)
         WillingToBeCaressed = true
     else
-        MiscUtil.PrintConsole("SceneCaress: NPC is not willing to be caressed due to low Intimacy.")
+        Debug.Notification("Your partner requires more intimacy to accept this.")
+    endif
+    ;Regardless of Morality, make it true for lover
+    if actor1.GetRelationshipRank(PlayerRef) == 4
+        WillingToBeCaressed = true
     endif
     if WillingToBeCaressed == true
         ;Automatic failure if attraction is too low
         if OCR_CurrentAttraction.GetValue() > 0.85
-            ;Calculate the success rate for this interaction
-            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 30)
-            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.1)
-            float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 5)
-            float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
-            MiscUtil.PrintConsole("SceneCaress: Bonus_Attraction is " + Bonus_Attraction)
-            MiscUtil.PrintConsole("SceneCaress: Bonus_Love is " + Bonus_Love)
-            MiscUtil.PrintConsole("SceneCaress: Bonus_Speechcraft is " + Bonus_Speechcraft)
+        ;Calculate the success rate for this interaction
+        float SuccessChance
+            ;Guaranteed success for lover or the first partner
+            if actor1.GetRelationshipRank(PlayerRef) == 4 || actor1.HasKeyword(IOSS_FirstPartner)
+                SuccessChance = 100
+                MiscUtil.PrintConsole("SceneCourt: success for this interaction is guaranteed for Lover relation or the first partner.")
+            Else
+                float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 30)
+                float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.1)
+                float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 5)
+                SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
+                MiscUtil.PrintConsole("SceneCaress: Bonus_Attraction is " + Bonus_Attraction)
+                MiscUtil.PrintConsole("SceneCaress: Bonus_Love is " + Bonus_Love)
+                MiscUtil.PrintConsole("SceneCaress: Bonus_Speechcraft is " + Bonus_Speechcraft)
+            endif
             MiscUtil.PrintConsole("SceneCaress: Success rate for this interaction is " + SuccessChance)
             ;Now, "roll the dice"
             float RandomChance = Utility.RandomFloat(0, 100)
@@ -163,10 +210,10 @@ function SceneCaress(actor actor1)
                 Util.CaressFail(actor1)
                 AnimationPlayed = 6  ; Indicates the "CaressFail" result
             endif
-    Else
-        Util.CaressFail(actor1)
-        AnimationPlayed = 6  ; Indicates the "CaressFail" result
-    endif
+        Else
+            Util.CaressFail(actor1)
+            AnimationPlayed = 6  ; Indicates the "CaressFail" result
+        endif
     Else
         Util.CaressFail(actor1)
         AnimationPlayed = 6  ; Indicates the "CaressFail" result
@@ -175,11 +222,15 @@ function SceneCaress(actor actor1)
 endFunction
 
 function SceneKiss(actor actor1)
+    ;Manage alias
     SceneNPC.Clear()
     SceneNPC.ForceRefTo(actor1)
+    ;Manage cheating detection
     IOSS_CheatingDetectionType.SetValue(0)
     IOSS_CheatingDetection.Stop()
     IOSS_CheatingDetection.Start()
+    ;Manage bonuses
+    ApplyEaseOfUseBonuses(actor1)
     actor1.AddToFaction(OCR_Lover_Value_Love)
     ;Based on NPC's morality, kissing may require a minimum Intimacy value
     float actor1Morality  = actor1.GetAV("Morality")
@@ -194,19 +245,26 @@ function SceneKiss(actor actor1)
     elseif actor1.GetAV("Morality") >= 2 && actor1.IsInFaction(OCR_Lover_PlayerCommittedRelationshipFaction) == 1 && actor1Intimacy >= 10
         WillingToKiss = true
     Else
-        MiscUtil.PrintConsole("SceneKiss: NPC is not willing to be kissed due to low Intimacy or not being in a committed relationship.")
+        Debug.Notification("Your partner requires more intimacy or to go steady to accept this.")
     endif
     if WillingToKiss == true
         ;Automatic failure if attraction is too low
         if OCR_CurrentAttraction.GetValue() > 0.85
             ;Calculate the success rate for this interaction
-            float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 15)
-            float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.5)
-            float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 10)
-            float SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
-            MiscUtil.PrintConsole("SceneKiss: Bonus_Attraction is " + Bonus_Attraction)
-            MiscUtil.PrintConsole("SceneKiss: Bonus_Love is " + Bonus_Love)
-            MiscUtil.PrintConsole("SceneKiss: Bonus_Speechcraft is " + Bonus_Speechcraft)
+            float SuccessChance
+            ;Guaranteed success for lover
+            if actor1.GetRelationshipRank(PlayerRef) == 4
+                SuccessChance = 100
+                MiscUtil.PrintConsole("SceneCaress: success for this interaction is guaranteed for Lover.")
+            Else
+                float Bonus_Attraction = (OCR_CurrentAttraction.GetValue() * 15)
+                float Bonus_Love = (actor1.GetFactionRank(OCR_Lover_Value_Love) * 1.5)
+                float Bonus_Speechcraft = (playerref.GetAV("Speechcraft") / 10)
+                SuccessChance = Bonus_Attraction + Bonus_Love + Bonus_Speechcraft
+                MiscUtil.PrintConsole("SceneKiss: Bonus_Attraction is " + Bonus_Attraction)
+                MiscUtil.PrintConsole("SceneKiss: Bonus_Love is " + Bonus_Love)
+                MiscUtil.PrintConsole("SceneKiss: Bonus_Speechcraft is " + Bonus_Speechcraft)
+            endif
             MiscUtil.PrintConsole("SceneKiss: Success rate for this interaction is " + SuccessChance)
             ;Now, "roll the dice"
             float RandomChance = Utility.RandomFloat(0, 100)
@@ -242,6 +300,8 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
         OCR_GlobalFunctions.AdvanceTimeByHours(1.5, GameHour, GameDay, GameDaysPassed, GameMonth, GameYear)
         ;Speech gain
         Game.AdvanceSkill("Speechcraft", 200.0)
+        ;Apply chatter cooldown
+        ChatterCooldown(SceneNPC.GetActorReference())
         ;Result messages
         IOSS_SceneMSG_Chatter_Success1.Show()
         ;Reveal attraction
@@ -267,7 +327,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
             if currentLove < 100
                 if currentLove < 15
-                    LoveGain(actor1, 3)
+                    LoveGain(actor1, 4)
                 elseIf currentLove < 30
                     LoveGain(actor1, 2)
                 elseIf currentLove < 60
@@ -329,7 +389,7 @@ Event OStimEnd(string eventName, string strArg, float numArg, Form sender)
             int currentLove = actor1.GetFactionRank(OCR_Lover_Value_Love)
             if currentLove < 100
                 if currentLove < 25
-                    LoveGain(actor1, 5)
+                    LoveGain(actor1, 6)
                 elseIf currentLove < 50
                     LoveGain(actor1, 4)
                 elseIf currentLove < 75
@@ -425,7 +485,10 @@ function LoveGain(actor actor1, int value)
         Debug.Notification("You must commit to this person to progress the relationship.")
         return
     endif
-    int newLove = actor1Love + value
+    int newLove = actor1Love + (value * 3)
+    if newLove > 100
+        newLove = 100
+    endif
     actor1.SetFactionRank(OCR_Lover_Value_Love, newLove)
     LoveGainNotification(actor1)
     MiscUtil.PrintConsole("LoveGain: Commitment restriction on love gain not applied.")
@@ -461,6 +524,9 @@ endif
 endFunction
 
 ;Functions for applying cooldowns
+function ChatterCooldown(actor actor1)
+    IOSS_ChatterCooldownSpell.Cast(playerref, actor1)
+endFunction
 function OfCourseCooldown(actor actor1)
     ;It is annoying to keep hearing "of course" across multiple interactions, so this function will apply a temporary keyword for the NPC to use the unvoiced (Nods) response instead.
     IOSS_OfCourseCooldownSpell.Cast(playerref, actor1)
@@ -491,5 +557,39 @@ function RefusalCooldown_Seduce(actor actor1)
         else
             InteractionCooldown2h(actor1)
         endif
+    endif
+endfunction
+
+;A function for applying "ease of use" bonuses, making romance success easier for first partners, followers, lover
+function ApplyEaseOfUseBonuses(actor actor1)
+    ;FirstPartner
+    if IOSS_FirstPartnerBonusApplied.GetValue() == 0
+        FirstPartner.ForceRefTo(actor1)
+        IOSS_FirstPartnerBonusApplied.SetValue(1)
+        MiscUtil.PrintConsole("ApplyEaseOfUseBonuses: NPC is the PC's first partner.")
+    endif
+    if IOSS_FirstPartnerBonusApplied.GetValue() == 1
+        if actor1.HasKeyword(IOSS_FirstPartner)
+            if OCR_CurrentAttraction.GetValue() < 2
+                OCR_CurrentAttraction.SetValue(2)
+                MiscUtil.PrintConsole("ApplyEaseOfUseBonuses: Applied first partner's minimum Attraction.")
+            endif
+        endif
+    endif
+    ;Follower
+    if actor1.IsInFaction(IOSS_IsOrWasFollower) == 0 && actor1.IsPlayerTeammate()
+        actor1.AddToFaction(IOSS_IsOrWasFollower)
+    endif
+    if actor1.IsInFaction(IOSS_IsOrWasFollower)
+        float currentattraction = OCR_CurrentAttraction.GetValue()
+        float followerintimacy = actor1.GetFactionRank(OCR_Lover_Value_Intimacy) as float
+        float newattraction = currentattraction + 0.25 + ((followerintimacy + 1) / 400)
+        OCR_CurrentAttraction.SetValue(newattraction)
+        MiscUtil.PrintConsole("ApplyEaseOfUseBonuses: Follower attraction bonus applied.")
+    endif
+    ;Lover
+    if OCR_CurrentAttraction.GetValue() < 0.85 && actor1.GetRelationshipRank(PlayerRef) == 4
+        OCR_CurrentAttraction.SetValue(0.85)
+        MiscUtil.PrintConsole("ApplyEaseOfUseBonuses: Applied lover's minimum Attraction.")
     endif
 endfunction
